@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: ai-builder-postgres
+    restart: unless-stopped
+
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: ai_builder
+      POSTGRES_PASSWORD: ai_builder_password
+      POSTGRES_DB: ai_builder
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - ai-builder-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ai-builder-network:
+    driver: bridge

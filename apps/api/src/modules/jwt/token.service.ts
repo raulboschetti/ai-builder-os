@@ -5,11 +5,23 @@ import { JwtService } from '@nestjs/jwt';
 export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
-  generateToken(payload: object) {
-    return this.jwtService.sign(payload);
+  generateAccessToken(payload: object): string {
+    return this.jwtService.sign(payload, {
+      expiresIn: '1h',
+    });
   }
 
-  verifyToken(token: string) {
+  generateRefreshToken(payload: object): string {
+    return this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+  }
+
+  verifyAccessToken(token: string) {
+    return this.jwtService.verify(token);
+  }
+
+  verifyRefreshToken(token: string) {
     return this.jwtService.verify(token);
   }
 }

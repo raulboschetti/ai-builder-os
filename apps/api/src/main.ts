@@ -33,6 +33,15 @@ async function bootstrap() {
     .setTitle('AI Builder OS API')
     .setDescription('Official API')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Introduce el Access Token',
+      },
+      'access-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

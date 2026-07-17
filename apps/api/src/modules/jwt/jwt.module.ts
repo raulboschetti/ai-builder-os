@@ -1,15 +1,22 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { TokenService } from './token.service';
 
 @Module({
   imports: [
-    JwtModule.register({
-      global: true,
-      secret: 'AI_BUILDER_OS_SECRET_KEY',
-      signOptions: {
-        expiresIn: '1h',
-      },
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        global: true,
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.getOrThrow<string>('JWT_EXPIRES_IN') as '1h',
+        },
+      }),
     }),
   ],
   providers: [TokenService],

@@ -24,6 +24,7 @@ model User {
   workspaces  Workspace[]
   projects    Project[]
   invitationsSent Invitation[]
+  notifications   Notification[]
 
   @@index([email])
 }
@@ -173,4 +174,22 @@ model Invitation {
 
   @@index([organizationId])
   @@index([email])
+}
+
+enum NotificationType {
+  MEMBER_JOINED
+  PASSWORD_CHANGED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

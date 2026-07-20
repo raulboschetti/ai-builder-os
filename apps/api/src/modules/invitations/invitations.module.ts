@@ -4,6 +4,7 @@ import { PrismaModule } from '../../database/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { CryptoModule } from '../crypto/crypto.module';
 import { EmailModule } from '../email/email.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 import {
   OrganizationInvitationsController,
@@ -12,7 +13,7 @@ import {
 import { InvitationsService } from './invitations.service';
 
 @Module({
-  imports: [PrismaModule, EmailModule, CryptoModule, AuthModule],
+  imports: [PrismaModule, EmailModule, CryptoModule, AuthModule, NotificationsModule],
   controllers: [OrganizationInvitationsController, PublicInvitationsController],
   providers: [InvitationsService],
 })

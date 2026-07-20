@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { NotificationType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { PasswordService } from '../crypto/password.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { UserMapper } from './mappers/user.mapper';
 
@@ -11,6 +13,7 @@ export class UsersService {
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
     private readonly organizationsService: OrganizationsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -197,6 +200,12 @@ export class UsersService {
       where: { id: userId },
       data: { password: hashedPassword },
     });
+
+    await this.notificationsService.create(
+      userId,
+      NotificationType.PASSWORD_CHANGED,
+      'Se ha cambiado la contraseña de tu cuenta',
+    );
   }
 
   /** Guarda la ruta pública del avatar recién subido. */

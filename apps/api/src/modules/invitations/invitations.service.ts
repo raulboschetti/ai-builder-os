@@ -7,11 +7,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InvitationStatus, MembershipRole } from '@prisma/client';
+import { InvitationStatus, MembershipRole, NotificationType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { PasswordService } from '../crypto/password.service';
 import { EmailService } from '../email/email.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { InvitationMapper } from './mappers/invitation.mapper';
 
 const INVITATION_TTL_DAYS = 7;
@@ -23,6 +24,7 @@ export class InvitationsService {
     private readonly emailService: EmailService,
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -165,6 +167,13 @@ export class InvitationsService {
         data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
       });
     });
+
+    const displayName = data.name?.trim() || invitation.email;
+    await this.notificationsService.create(
+      invitation.invitedBy,
+      NotificationType.MEMBER_JOINED,
+      `${displayName} se ha unido a tu organización`,
+    );
 
     return { email: invitation.email, password: data.password };
   }

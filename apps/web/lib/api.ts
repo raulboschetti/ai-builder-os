@@ -227,6 +227,30 @@ export function deleteProject(workspaceId: string, projectId: string) {
   );
 }
 
+export interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export function listNotifications() {
+  return authenticatedRequest<Notification[]>("/notifications");
+}
+
+export function markNotificationRead(id: string) {
+  return authenticatedRequest<void>(`/notifications/${id}/read`, {
+    method: "PATCH",
+  });
+}
+
+export function markAllNotificationsRead() {
+  return authenticatedRequest<void>("/notifications/read-all", {
+    method: "PATCH",
+  });
+}
+
 export interface Invitation {
   id: string;
   email: string;

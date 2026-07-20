@@ -23,10 +23,10 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     HealthModule,
     AuthModule,
     UsersModule,
+    InvitationsModule,
     OrganizationsModule,
     WorkspacesModule,
     ProjectsModule,
-    InvitationsModule,
   ],
   controllers: [AppController],
 })

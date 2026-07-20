@@ -62,6 +62,12 @@ export function Sidebar() {
           </span>
         ))}
       </nav>
+
+      <div className="mt-auto rounded-lg border border-grid-500/50 px-3 py-2.5">
+        <p className="font-mono text-[10px] uppercase tracking-wide text-amber-400">
+          🇪🇸 Hecho en España
+        </p>
+      </div>
     </aside>
   );
 }

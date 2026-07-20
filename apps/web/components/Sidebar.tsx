@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Blocks,
   CreditCard,
@@ -15,7 +16,7 @@ import {
 const LIVE_ITEMS = [
   { label: "Inicio", icon: Home, href: "/" },
   { label: "Proyectos", icon: LayoutGrid, href: "/" },
-  { label: "Configuración", icon: Settings, href: "/" },
+  { label: "Configuración", icon: Settings, href: "/settings" },
 ];
 
 const UPCOMING_ITEMS = [
@@ -36,14 +37,14 @@ export function Sidebar() {
 
       <nav className="flex flex-col gap-1">
         {LIVE_ITEMS.map((item) => (
-          <a
+          <Link
             key={item.label}
             href={item.href}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-paper-200/80 transition hover:bg-ink-800 hover:text-paper-50"
           >
             <item.icon size={16} strokeWidth={1.75} />
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
 

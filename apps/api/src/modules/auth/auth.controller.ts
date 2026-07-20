@@ -6,10 +6,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import {
-  AuthenticatedUser,
-  CurrentUser,
-} from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';

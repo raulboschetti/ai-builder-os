@@ -98,8 +98,8 @@ export class AuthService {
 
   private buildSessionResponse(
     user: { id: string; name: string | null; email: string },
-    membership: Awaited<
-      ReturnType<OrganizationsService['findPrimaryMembership']>
+    membership: NonNullable<
+      Awaited<ReturnType<OrganizationsService['findPrimaryMembership']>>
     >,
   ) {
     const payload = {

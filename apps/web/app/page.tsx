@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { getAccessToken } from "../lib/api";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
 interface MeResponse {
   user: { id: string; name: string | null; email: string };

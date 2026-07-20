@@ -18,8 +18,16 @@ import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { InvitationsService } from './invitations.service';
 
+/**
+ * Deliberadamente bajo /invitations (no /organizations/invitations) para
+ * que ninguna ruta paramétrica de otro controlador (tipo /organizations/:id)
+ * pueda "tragarse" esta por accidente según el orden de carga de módulos.
+ * GET /invitations (sin segmento) y GET /invitations/:token (con segmento)
+ * son patrones distintos para Express, así que no chocan entre sí pase lo
+ * que pase con el orden de import.
+ */
 @ApiTags('Invitations')
-@Controller('organizations/invitations')
+@Controller('invitations')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('access-token')
 export class OrganizationInvitationsController {
@@ -81,7 +89,6 @@ export class PublicInvitationsController {
       body,
     );
 
-    // Reutiliza el login normal para no duplicar la emisión de tokens.
     return this.authService.login(email, password);
   }
 }

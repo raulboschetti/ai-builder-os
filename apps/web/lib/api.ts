@@ -241,18 +241,18 @@ export function listOrganizationUsers() {
 }
 
 export function listInvitations() {
-  return authenticatedRequest<Invitation[]>("/organizations/invitations");
+  return authenticatedRequest<Invitation[]>("/invitations");
 }
 
 export function createInvitation(email: string) {
-  return authenticatedRequest<Invitation>("/organizations/invitations", {
+  return authenticatedRequest<Invitation>("/invitations", {
     method: "POST",
     body: JSON.stringify({ email }),
   });
 }
 
 export function revokeInvitation(id: string) {
-  return authenticatedRequest<void>(`/organizations/invitations/${id}`, {
+  return authenticatedRequest<void>(`/invitations/${id}`, {
     method: "DELETE",
   });
 }

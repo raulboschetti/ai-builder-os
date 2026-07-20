@@ -73,13 +73,28 @@ enum ProjectStatus {
   ARCHIVED
 }
 
+enum ProjectBuildStage {
+  INTAKE
+  ARCHITECTURE_GENERATED
+  BUILDING
+  DEPLOYED
+}
+
 model Project {
   id          String        @id @default(cuid())
   workspaceId String
   name        String
   slug        String
   status      ProjectStatus @default(DRAFT)
-  createdBy   String
+
+  // Contexto de negocio que da el dueño no técnico al crear el proyecto;
+  // es lo que consume la IA para arrancar el diseño de arquitectura.
+  businessVertical String? // ej: "dentista", "fontanero", "seguros" — texto libre, no un enum cerrado
+  description       String? @db.Text
+
+  buildStage ProjectBuildStage @default(INTAKE)
+
+  createdBy String
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

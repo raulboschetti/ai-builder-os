@@ -26,11 +26,15 @@ export class ProjectsService {
     organizationId: string,
     workspaceId: string,
     userId: string,
-    name: string,
+    data: {
+      name: string;
+      businessVertical?: string;
+      description?: string;
+    },
   ) {
     await this.assertWorkspaceInOrganization(organizationId, workspaceId);
 
-    const slug = await generateUniqueSlug(name, async (candidate) => {
+    const slug = await generateUniqueSlug(data.name, async (candidate) => {
       const existing = await this.prisma.project.findUnique({
         where: {
           workspaceId_slug: {
@@ -45,8 +49,10 @@ export class ProjectsService {
     const project = await this.prisma.project.create({
       data: {
         workspaceId,
-        name,
+        name: data.name,
         slug,
+        businessVertical: data.businessVertical,
+        description: data.description,
         createdBy: userId,
       },
     });

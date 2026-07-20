@@ -50,11 +50,10 @@ export class ProjectsController {
     @Body() body: CreateProjectDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.projectsService.create(
-      user.organizationId,
-      workspaceId,
-      user.id,
-      body.name,
-    );
+    return this.projectsService.create(user.organizationId, workspaceId, user.id, {
+      name: body.name,
+      businessVertical: body.businessVertical,
+      description: body.description,
+    });
   }
 }

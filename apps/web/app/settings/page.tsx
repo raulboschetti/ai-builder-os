@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 
+import { InviteMembers } from "../../components/InviteMembers";
 import { ProfileSettings } from "../../components/ProfileSettings";
 import { Sidebar } from "../../components/Sidebar";
 import { UserMenu } from "../../components/UserMenu";
 import {
   ApiError,
   getAccessToken,
+  Invitation,
+  listInvitations,
   listOrganizationUsers,
   me,
   MeResponse,
@@ -20,6 +23,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [session, setSession] = useState<MeResponse | null>(null);
   const [members, setMembers] = useState<SessionUser[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,10 +33,11 @@ export default function SettingsPage() {
       return;
     }
 
-    Promise.all([me(), listOrganizationUsers()])
-      .then(([meResponse, users]) => {
+    Promise.all([me(), listOrganizationUsers(), listInvitations()])
+      .then(([meResponse, users, pending]) => {
         setSession(meResponse);
         setMembers(users);
+        setInvitations(pending);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -124,11 +129,15 @@ export default function SettingsPage() {
               </ul>
             </section>
 
+            <InviteMembers
+              invitations={invitations}
+              onInvitationsChange={setInvitations}
+            />
+
             <div className="rounded-xl border border-dashed border-grid-500 p-6 text-center">
               <p className="text-sm text-paper-200/60">
-                Invitar miembros, cambiar el nombre de la organización y
-                gestionar roles todavía no están conectados — están en el
-                roadmap.
+                Cambiar el nombre de la organización y gestionar roles
+                todavía no están conectados — están en el roadmap.
               </p>
             </div>
           </div>

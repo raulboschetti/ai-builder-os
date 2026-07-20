@@ -23,6 +23,7 @@ model User {
   memberships Membership[]
   workspaces  Workspace[]
   projects    Project[]
+  invitationsSent Invitation[]
 
   @@index([email])
 }
@@ -44,6 +45,7 @@ model Organization {
 
   memberships Membership[]
   workspaces  Workspace[]
+  invitations Invitation[]
 
   @@index([slug])
 }
@@ -144,4 +146,31 @@ model Session {
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+model Invitation {
+  id             String            @id @default(cuid())
+  organizationId String
+  email          String
+  role           MembershipRole    @default(MEMBER)
+  token          String            @unique
+  status         InvitationStatus  @default(PENDING)
+  invitedBy      String
+
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  acceptedAt DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter      User         @relation(fields: [invitedBy], references: [id])
+
+  @@index([organizationId])
+  @@index([email])
 }

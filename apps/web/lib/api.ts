@@ -227,8 +227,53 @@ export function deleteProject(workspaceId: string, projectId: string) {
   );
 }
 
+export interface Invitation {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
 export function listOrganizationUsers() {
   return authenticatedRequest<SessionUser[]>("/users");
+}
+
+export function listInvitations() {
+  return authenticatedRequest<Invitation[]>("/organizations/invitations");
+}
+
+export function createInvitation(email: string) {
+  return authenticatedRequest<Invitation>("/organizations/invitations", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function revokeInvitation(id: string) {
+  return authenticatedRequest<void>(`/organizations/invitations/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export interface InvitationPreview {
+  email: string;
+  organizationName: string;
+}
+
+export function getInvitation(token: string) {
+  return request<InvitationPreview>(`/invitations/${token}`);
+}
+
+export function acceptInvitation(
+  token: string,
+  data: { name?: string; password: string },
+) {
+  return request<AuthResponse>(`/invitations/${token}/accept`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }
 
 export function updateProfile(data: { name?: string }) {

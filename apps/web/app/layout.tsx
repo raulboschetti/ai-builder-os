@@ -17,7 +17,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "AI Builder OS",
+  title: "Kroquix",
   description: "La IA que diseña y construye tu negocio de principio a fin.",
 };
 

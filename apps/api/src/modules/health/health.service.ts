@@ -5,7 +5,7 @@ export class HealthService {
   getStatus() {
     return {
       status: 'ok',
-      service: 'AI Builder OS API',
+      service: 'Kroquix API',
       timestamp: new Date().toISOString(),
     };
   }

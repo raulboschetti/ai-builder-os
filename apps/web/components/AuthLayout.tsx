@@ -19,7 +19,7 @@ export function AuthLayout({
       {/* Blueprint panel — hidden on small screens */}
       <div className="blueprint-grid relative hidden w-1/2 flex-col justify-between overflow-hidden border-r border-grid-500/60 p-12 md:flex">
         <div className="draw-in font-mono text-xs uppercase tracking-[0.2em] text-cyan-400">
-          AI-BUILDER-OS · DOC 01
+          KROQUIX · DOC 01
         </div>
 
         <div className="draw-in flex flex-col items-start gap-8">

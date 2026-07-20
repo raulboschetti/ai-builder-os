@@ -5,7 +5,7 @@ export class AppController {
   @Get()
   getStatus() {
     return {
-      name: 'AI Builder OS',
+      name: 'Kroquix',
       version: '1.0.0',
       status: 'running',
       environment: 'development',

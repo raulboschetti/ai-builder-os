@@ -30,7 +30,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('AI Builder OS API')
+    .setTitle('Kroquix API')
     .setDescription('Official API')
     .setVersion('1.0')
     .addBearerAuth(

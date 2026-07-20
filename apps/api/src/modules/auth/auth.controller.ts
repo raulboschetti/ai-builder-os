@@ -12,6 +12,7 @@ import {
 } from '../../common/decorators/current-user.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
@@ -24,6 +25,13 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   login(@Body() body: LoginDto) {
     return this.authService.login(body.email, body.password);
+  }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Cambiar un refresh token por un par de tokens nuevo' })
+  @ApiBody({ type: RefreshTokenDto })
+  refresh(@Body() body: RefreshTokenDto) {
+    return this.authService.refresh(body.refreshToken);
   }
 
   @Get('me')

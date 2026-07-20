@@ -41,6 +41,67 @@ export class AuthService {
       );
     }
 
+    return this.buildSessionResponse(user, membership);
+  }
+
+  /**
+   * Cambia un refresh token válido por un par access+refresh nuevo.
+   * Vuelve a leer la membership actual (no confía en lo que decía el
+   * token viejo) por si el rol o la organización activa cambiaron
+   * entre medias.
+   */
+  async refresh(refreshToken: string) {
+    let payload: { sub: string };
+
+    try {
+      payload = this.tokenService.verifyRefreshToken(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Refresh token inválido o caducado');
+    }
+
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user) {
+      throw new UnauthorizedException('Refresh token inválido o caducado');
+    }
+
+    const membership = await this.organizationsService.findPrimaryMembership(
+      payload.sub,
+    );
+
+    if (!membership) {
+      throw new UnauthorizedException(
+        'El usuario no pertenece a ninguna organización',
+      );
+    }
+
+    // findById devuelve el DTO mapeado (sin password); findByEmail sí la
+    // trae, pero aquí no la necesitamos para reemitir tokens.
+    return this.buildSessionResponse(
+      { id: user.id, name: user.name, email: user.email },
+      membership,
+    );
+  }
+
+  /** Usado por GET /auth/me: reconstruye el contexto de sesión a partir del JWT ya validado. */
+  async getCurrentUser(userId: string, organizationId: string) {
+    const [profile, membership] = await Promise.all([
+      this.usersService.findById(userId),
+      this.organizationsService.findByIdForUser(organizationId, userId),
+    ]);
+
+    return {
+      user: profile,
+      organization: membership,
+    };
+  }
+
+  private buildSessionResponse(
+    user: { id: string; name: string | null; email: string },
+    membership: Awaited<
+      ReturnType<OrganizationsService['findPrimaryMembership']>
+    >,
+  ) {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -66,19 +127,6 @@ export class AuthService {
         slug: membership.organization.slug,
         role: membership.role,
       },
-    };
-  }
-
-  /** Usado por GET /auth/me: reconstruye el contexto de sesión a partir del JWT ya validado. */
-  async getCurrentUser(userId: string, organizationId: string) {
-    const [profile, membership] = await Promise.all([
-      this.usersService.findById(userId),
-      this.organizationsService.findByIdForUser(organizationId, userId),
-    ]);
-
-    return {
-      user: profile,
-      organization: membership,
     };
   }
 }

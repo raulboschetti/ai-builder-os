@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { LogOut, Settings } from "lucide-react";
 
 import { avatarUrl, clearSession } from "../lib/api";
+import { useClickOutside } from "../lib/useClickOutside";
 
 export function UserMenu({
   name,
@@ -16,7 +17,10 @@ export function UserMenu({
 }) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const resolvedImage = avatarUrl(image ?? null);
+
+  useClickOutside(containerRef, () => setMenuOpen(false), menuOpen);
 
   function handleLogout() {
     clearSession();
@@ -24,7 +28,7 @@ export function UserMenu({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={() => setMenuOpen((open) => !open)}
         className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-grid-500 font-mono text-sm text-paper-50"

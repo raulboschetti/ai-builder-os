@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, HelpCircle } from "lucide-react";
 
 import {
@@ -8,6 +8,7 @@ import {
   markAllNotificationsRead,
   Notification,
 } from "../lib/api";
+import { useClickOutside } from "../lib/useClickOutside";
 import { UserMenu } from "./UserMenu";
 
 export function HeaderActions({
@@ -19,6 +20,9 @@ export function HeaderActions({
 }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(containerRef, () => setOpen(false), open);
 
   useEffect(() => {
     listNotifications()
@@ -41,7 +45,7 @@ export function HeaderActions({
 
   return (
     <div className="flex items-center gap-2">
-      <div className="relative">
+      <div className="relative" ref={containerRef}>
         <button
           onClick={handleOpen}
           title="Notificaciones"

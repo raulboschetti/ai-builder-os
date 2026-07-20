@@ -21,6 +21,12 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    if (!user.password) {
+      throw new UnauthorizedException(
+        'Esta cuenta inicia sesión con Google, no con contraseña',
+      );
+    }
+
     const passwordIsValid = await this.passwordService.verify(
       password,
       user.password,
@@ -36,6 +42,32 @@ export class AuthService {
 
     if (!membership) {
       // No debería ocurrir: todo usuario se crea con una organización.
+      throw new UnauthorizedException(
+        'El usuario no pertenece a ninguna organización',
+      );
+    }
+
+    return this.buildSessionResponse(user, membership);
+  }
+
+  /**
+   * Login/registro vía Google. usersService.findOrCreateFromGoogle ya
+   * garantiza usuario + organización (crea, vincula, o reutiliza según
+   * corresponda); aquí solo emitimos los tokens de sesión.
+   */
+  async loginWithGoogle(profile: {
+    providerAccountId: string;
+    email: string;
+    name?: string;
+    image?: string;
+  }) {
+    const user = await this.usersService.findOrCreateFromGoogle(profile);
+
+    const membership = await this.organizationsService.findPrimaryMembership(
+      user.id,
+    );
+
+    if (!membership) {
       throw new UnauthorizedException(
         'El usuario no pertenece a ninguna organización',
       );

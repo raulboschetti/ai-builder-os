@@ -1,4 +1,4 @@
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
 export interface SessionUser {
@@ -77,8 +77,12 @@ const ACCESS_TOKEN_KEY = "aibuilder_access_token";
 const REFRESH_TOKEN_KEY = "aibuilder_refresh_token";
 
 export function storeSession(auth: AuthResponse) {
-  localStorage.setItem(ACCESS_TOKEN_KEY, auth.accessToken);
-  localStorage.setItem(REFRESH_TOKEN_KEY, auth.refreshToken);
+  storeTokens(auth.accessToken, auth.refreshToken);
+}
+
+export function storeTokens(accessToken: string, refreshToken: string) {
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
 }
 
 export function clearSession() {

@@ -77,4 +77,77 @@ export class UsersService {
 
     return UserMapper.toResponse(user);
   }
+
+  /**
+   * Login/registro con Google: si ya existe una Account vinculada, usa ese
+   * usuario. Si el email ya existe sin cuenta de Google, vincula la nueva
+   * Account a ese usuario (account linking). Si no existe nada, crea
+   * usuario + organización + Account en una única transacción, igual que
+   * el registro normal.
+   */
+  async findOrCreateFromGoogle(profile: {
+    providerAccountId: string;
+    email: string;
+    name?: string;
+    image?: string;
+  }) {
+    const existingAccount = await this.prisma.account.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider: 'google',
+          providerAccountId: profile.providerAccountId,
+        },
+      },
+      include: { user: true },
+    });
+
+    if (existingAccount) {
+      return existingAccount.user;
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: profile.email },
+    });
+
+    if (existingUser) {
+      await this.prisma.account.create({
+        data: {
+          userId: existingUser.id,
+          provider: 'google',
+          providerAccountId: profile.providerAccountId,
+        },
+      });
+
+      return existingUser;
+    }
+
+    const organizationName = profile.name?.trim() || profile.email;
+
+    return this.prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          name: profile.name,
+          email: profile.email,
+          image: profile.image,
+          emailVerified: true,
+        },
+      });
+
+      await tx.account.create({
+        data: {
+          userId: createdUser.id,
+          provider: 'google',
+          providerAccountId: profile.providerAccountId,
+        },
+      });
+
+      await this.organizationsService.createWithOwner(
+        organizationName,
+        createdUser.id,
+        tx,
+      );
+
+      return createdUser;
+    });
+  }
 }

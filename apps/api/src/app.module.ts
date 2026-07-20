@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtConfigModule } from './modules/jwt/jwt.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 import { UsersModule } from './modules/users/users.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 
@@ -23,6 +24,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     UsersModule,
     OrganizationsModule,
     WorkspacesModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
 })

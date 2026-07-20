@@ -22,6 +22,7 @@ model User {
   sessions    Session[]
   memberships Membership[]
   workspaces  Workspace[]
+  projects    Project[]
 
   @@index([email])
 }
@@ -60,9 +61,35 @@ model Workspace {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   creator      User         @relation(fields: [createdBy], references: [id])
+  projects     Project[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  workspaceId String
+  name        String
+  slug        String
+  status      ProjectStatus @default(DRAFT)
+  createdBy   String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id])
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
 }
 
 model Membership {

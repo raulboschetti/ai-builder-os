@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationMapper } from './mappers/organization.mapper';
 import { OrganizationsService } from './organizations.service';
 
@@ -35,6 +36,20 @@ export class OrganizationsController {
       user.id,
     );
     return OrganizationMapper.toResponse(organization);
+  }
+
+  @Patch('me')
+  @ApiOperation({ summary: 'Renombrar mi organización (solo OWNER)' })
+  @ApiBody({ type: UpdateOrganizationDto })
+  updateMine(
+    @Body() body: UpdateOrganizationDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.organizationsService.updateName(
+      user.organizationId,
+      user.id,
+      body.name,
+    );
   }
 
   @Get(':id')

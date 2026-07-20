@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 
 import { InviteMembers } from "../../components/InviteMembers";
+import { OrganizationName } from "../../components/OrganizationName";
 import { ProfileSettings } from "../../components/ProfileSettings";
 import { Sidebar } from "../../components/Sidebar";
 import { UserMenu } from "../../components/UserMenu";
@@ -88,15 +89,19 @@ export default function SettingsPage() {
             />
 
             <section className="rounded-xl border border-grid-500/60 bg-ink-900 p-6">
-              <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-amber-400">
+              <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.15em] text-amber-400">
                 Tu organización
               </p>
-              <p className="mt-3 text-lg text-paper-50">
-                {session.organization.name}
-              </p>
-              <p className="mt-1 font-mono text-xs text-grid-400">
-                {session.organization.slug}
-              </p>
+              <OrganizationName
+                name={session.organization.name}
+                slug={session.organization.slug}
+                onNameChange={(name) =>
+                  setSession({
+                    ...session,
+                    organization: { ...session.organization, name },
+                  })
+                }
+              />
             </section>
 
             <section className="rounded-xl border border-grid-500/60 bg-ink-900 p-6">
@@ -136,8 +141,8 @@ export default function SettingsPage() {
 
             <div className="rounded-xl border border-dashed border-grid-500 p-6 text-center">
               <p className="text-sm text-paper-200/60">
-                Cambiar el nombre de la organización y gestionar roles
-                todavía no están conectados — están en el roadmap.
+                Gestionar roles todavía no está conectado — está en el
+                roadmap.
               </p>
             </div>
           </div>

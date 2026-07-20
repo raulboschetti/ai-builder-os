@@ -283,6 +283,16 @@ export function updateProfile(data: { name?: string }) {
   });
 }
 
+export function updateOrganization(name: string) {
+  return authenticatedRequest<{ id: string; name: string; slug: string }>(
+    "/organizations/me",
+    {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    },
+  );
+}
+
 export function changePassword(data: {
   currentPassword: string;
   newPassword: string;

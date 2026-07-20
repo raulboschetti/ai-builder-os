@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { MembershipRole, Prisma } from '@prisma/client';
 
 import { generateUniqueSlug } from '../../common/utils/slug.util';
@@ -87,5 +87,31 @@ export class OrganizationsService {
       orderBy: { createdAt: 'asc' },
       include: { organization: true },
     });
+  }
+
+  /**
+   * Renombra la organización. Solo el OWNER puede hacerlo — el rol viene
+   * del JWT (ya validado al hacer login), pero lo comprobamos aquí también
+   * porque el token puede llevar tiempo emitido y el rol pudo cambiar.
+   */
+  async updateName(organizationId: string, userId: string, name: string) {
+    const membership = await this.prisma.membership.findUnique({
+      where: {
+        userId_organizationId: { userId, organizationId },
+      },
+    });
+
+    if (!membership || membership.role !== MembershipRole.OWNER) {
+      throw new ForbiddenException(
+        'Solo el propietario de la organización puede cambiar su nombre',
+      );
+    }
+
+    const organization = await this.prisma.organization.update({
+      where: { id: organizationId },
+      data: { name },
+    });
+
+    return OrganizationMapper.toResponse(organization);
   }
 }

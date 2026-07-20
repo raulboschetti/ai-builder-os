@@ -8,7 +8,7 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { BuildStageTimeline } from "../../../components/BuildStageTimeline";
 import { EditProjectForm } from "../../../components/EditProjectForm";
 import { Sidebar } from "../../../components/Sidebar";
-import { UserMenu } from "../../../components/UserMenu";
+import { HeaderActions } from "../../../components/HeaderActions";
 import {
   ApiError,
   deleteProject,
@@ -99,7 +99,7 @@ export default function ProjectDetailPage() {
             Volver a proyectos
           </Link>
           {user && (
-            <UserMenu name={user.name ?? user.email} image={user.image} />
+            <HeaderActions name={user.name ?? user.email} image={user.image} />
           )}
         </div>
 

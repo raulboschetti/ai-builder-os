@@ -8,7 +8,7 @@ import { InviteMembers } from "../../components/InviteMembers";
 import { OrganizationName } from "../../components/OrganizationName";
 import { ProfileSettings } from "../../components/ProfileSettings";
 import { Sidebar } from "../../components/Sidebar";
-import { UserMenu } from "../../components/UserMenu";
+import { HeaderActions } from "../../components/HeaderActions";
 import {
   ApiError,
   getAccessToken,
@@ -68,7 +68,7 @@ export default function SettingsPage() {
             Configuración
           </h1>
           {session && (
-            <UserMenu
+            <HeaderActions
               name={session.user.name ?? session.user.email}
               image={session.user.image}
             />

@@ -16,6 +16,8 @@ import {
   X,
 } from "lucide-react";
 
+import { SpainSkyline } from "./SpainSkyline";
+
 const LIVE_ITEMS = [
   { label: "Inicio", icon: Home, href: "/" },
   { label: "Proyectos", icon: LayoutGrid, href: "/" },
@@ -98,10 +100,15 @@ export function Sidebar() {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-lg border border-grid-500/50 px-3 py-2.5">
-          <p className="font-mono text-[10px] uppercase tracking-wide text-amber-400">
-            🇪🇸 Hecho en España
-          </p>
+        <div className="mt-auto overflow-hidden rounded-lg border border-grid-500/50">
+          <div className="bg-ink-950 px-3 pt-3">
+            <SpainSkyline />
+          </div>
+          <div className="px-3 py-2.5">
+            <p className="font-mono text-[10px] uppercase tracking-wide text-amber-400">
+              🇪🇸 Hecho en España
+            </p>
+          </div>
         </div>
       </aside>
     </>

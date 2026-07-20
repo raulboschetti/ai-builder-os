@@ -1,6 +1,6 @@
 "use client";
 
-import { UserMenu } from "./UserMenu";
+import { HeaderActions } from "./HeaderActions";
 
 export function DashboardHeader({
   name,
@@ -20,7 +20,7 @@ export function DashboardHeader({
         <p className="text-sm text-paper-200/60">{organizationName}</p>
       </div>
 
-      <UserMenu name={name} image={image} />
+      <HeaderActions name={name} image={image} />
     </header>
   );
 }

@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { PasswordService } from '../crypto/password.service';
 import { TokenService } from '../jwt/token.service';
+import { OrganizationsService } from '../organizations/organizations.service';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
+    private readonly organizationsService: OrganizationsService,
   ) {}
 
   async login(email: string, password: string) {
@@ -28,9 +30,22 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    const membership = await this.organizationsService.findPrimaryMembership(
+      user.id,
+    );
+
+    if (!membership) {
+      // No debería ocurrir: todo usuario se crea con una organización.
+      throw new UnauthorizedException(
+        'El usuario no pertenece a ninguna organización',
+      );
+    }
+
     const payload = {
       sub: user.id,
       email: user.email,
+      organizationId: membership.organizationId,
+      role: membership.role,
     };
 
     const accessToken = this.tokenService.generateAccessToken(payload);
@@ -45,6 +60,25 @@ export class AuthService {
         name: user.name,
         email: user.email,
       },
+      organization: {
+        id: membership.organization.id,
+        name: membership.organization.name,
+        slug: membership.organization.slug,
+        role: membership.role,
+      },
+    };
+  }
+
+  /** Usado por GET /auth/me: reconstruye el contexto de sesión a partir del JWT ya validado. */
+  async getCurrentUser(userId: string, organizationId: string) {
+    const [profile, membership] = await Promise.all([
+      this.usersService.findById(userId),
+      this.organizationsService.findByIdForUser(organizationId, userId),
+    ]);
+
+    return {
+      user: profile,
+      organization: membership,
     };
   }
 }

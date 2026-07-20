@@ -18,10 +18,110 @@ model User {
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
 
-  accounts Account[]
-  sessions Session[]
+  accounts    Account[]
+  sessions    Session[]
+  memberships Membership[]
+  workspaces  Workspace[]
+  projects    Project[]
 
   @@index([email])
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Organization {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  memberships Membership[]
+  workspaces  Workspace[]
+
+  @@index([slug])
+}
+
+model Workspace {
+  id             String @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  createdBy      String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User         @relation(fields: [createdBy], references: [id])
+  projects     Project[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProjectBuildStage {
+  INTAKE
+  ARCHITECTURE_GENERATED
+  BUILDING
+  DEPLOYED
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  workspaceId String
+  name        String
+  slug        String
+  status      ProjectStatus @default(DRAFT)
+
+  // Contexto de negocio que da el dueño no técnico al crear el proyecto;
+  // es lo que consume la IA para arrancar el diseño de arquitectura.
+  businessVertical String? // ej: "dentista", "fontanero", "seguros" — texto libre, no un enum cerrado
+  description       String? @db.Text
+
+  buildStage ProjectBuildStage @default(INTAKE)
+
+  createdBy String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id])
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+}
+
+model Membership {
+  id             String         @id @default(cuid())
+  userId         String
+  organizationId String
+  role           MembershipRole @default(OWNER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
 }
 
 model Account {

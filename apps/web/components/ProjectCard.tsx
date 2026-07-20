@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Project } from "../lib/api";
 
 const STAGE_LABELS: Record<Project["buildStage"], string> = {
@@ -16,7 +17,10 @@ const STAGE_COLORS: Record<Project["buildStage"], string> = {
 
 export function ProjectCard({ project }: { project: Project }) {
   return (
-    <div className="rounded-xl border border-grid-500/60 bg-ink-900 p-5 transition hover:border-grid-400">
+    <Link
+      href={`/project/${project.id}?workspaceId=${project.workspaceId}`}
+      className="block rounded-xl border border-grid-500/60 bg-ink-900 p-5 transition hover:border-grid-400"
+    >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-[family-name:var(--font-display)] text-lg text-paper-50">
           {project.name}
@@ -39,6 +43,6 @@ export function ProjectCard({ project }: { project: Project }) {
           {project.description}
         </p>
       )}
-    </div>
+    </Link>
   );
 }

@@ -189,6 +189,12 @@ export function listProjects(workspaceId: string) {
   );
 }
 
+export function getProject(workspaceId: string, projectId: string) {
+  return authenticatedRequest<Project>(
+    `/workspaces/${workspaceId}/projects/${projectId}`,
+  );
+}
+
 export function listOrganizationUsers() {
   return authenticatedRequest<SessionUser[]>("/users");
 }

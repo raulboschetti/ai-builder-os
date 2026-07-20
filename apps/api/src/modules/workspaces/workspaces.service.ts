@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { generateUniqueSlug } from '../../common/utils/slug.util';
 import { PrismaService } from '../../database/prisma.service';
@@ -27,16 +28,39 @@ export class WorkspacesService {
       return existing !== null;
     });
 
-    const workspace = await this.prisma.workspace.create({
-      data: {
-        organizationId,
-        name,
-        slug,
-        createdBy: userId,
-      },
-    });
+    try {
+      const workspace = await this.prisma.workspace.create({
+        data: {
+          organizationId,
+          name,
+          slug,
+          createdBy: userId,
+        },
+      });
 
-    return WorkspaceMapper.toResponse(workspace);
+      return WorkspaceMapper.toResponse(workspace);
+    } catch (error) {
+      // Dos peticiones casi simultáneas (p.ej. un efecto de React que se
+      // dispara dos veces en desarrollo) pueden comprobar el slug libre
+      // a la vez y las dos intentar crearlo. En vez de que la segunda
+      // falle con un 500, devolvemos el workspace que ya se creó.
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        const existing = await this.prisma.workspace.findUnique({
+          where: {
+            organizationId_slug: { organizationId, slug },
+          },
+        });
+
+        if (existing) {
+          return WorkspaceMapper.toResponse(existing);
+        }
+      }
+
+      throw error;
+    }
   }
 
   async findAllInOrganization(organizationId: string) {

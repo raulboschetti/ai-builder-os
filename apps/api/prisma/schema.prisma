@@ -21,6 +21,7 @@ model User {
   accounts    Account[]
   sessions    Session[]
   memberships Membership[]
+  workspaces  Workspace[]
 
   @@index([email])
 }
@@ -41,8 +42,27 @@ model Organization {
   deletedAt DateTime?
 
   memberships Membership[]
+  workspaces  Workspace[]
 
   @@index([slug])
+}
+
+model Workspace {
+  id             String @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  createdBy      String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User         @relation(fields: [createdBy], references: [id])
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
 }
 
 model Membership {

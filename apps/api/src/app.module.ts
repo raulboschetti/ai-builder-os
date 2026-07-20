@@ -8,6 +8,7 @@ import { HealthModule } from './modules/health/health.module';
 import { JwtConfigModule } from './modules/jwt/jwt.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { UsersModule } from './modules/users/users.module';
+import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     UsersModule,
     OrganizationsModule,
+    WorkspacesModule,
   ],
   controllers: [AppController],
 })

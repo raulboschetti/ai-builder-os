@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
 import { PasswordService } from '../crypto/password.service';
@@ -149,5 +149,63 @@ export class UsersService {
 
       return createdUser;
     });
+  }
+
+  /** Actualiza el nombre visible del perfil. */
+  async updateProfile(userId: string, data: { name?: string }) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { name: data.name },
+    });
+
+    return UserMapper.toResponse(user);
+  }
+
+  /**
+   * Cambia la contraseña verificando primero la actual. Si la cuenta no
+   * tiene contraseña (solo Google), se rechaza — hay que usar el flujo de
+   * "establecer contraseña" en su lugar (todavía no existe).
+   */
+  async changePassword(
+    userId: string,
+    data: { currentPassword: string; newPassword: string },
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException(
+        'Esta cuenta no tiene contraseña (inicia sesión con Google)',
+      );
+    }
+
+    const currentIsValid = await this.passwordService.verify(
+      data.currentPassword,
+      user.password,
+    );
+
+    if (!currentIsValid) {
+      throw new UnauthorizedException('La contraseña actual no es correcta');
+    }
+
+    const hashedPassword = await this.passwordService.hash(data.newPassword);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+  }
+
+  /** Guarda la ruta pública del avatar recién subido. */
+  async updateAvatar(userId: string, imagePath: string) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { image: imagePath },
+    });
+
+    return UserMapper.toResponse(user);
   }
 }

@@ -42,6 +42,12 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# uploaded files (local dev storage — not for production, real storage TBD)
+uploads/*
+!uploads/avatars
+uploads/avatars/*
+!uploads/avatars/.gitkeep
+
 # temp directory
 .temp
 .tmp

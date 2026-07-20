@@ -121,6 +121,7 @@ export default function HomePage() {
         <DashboardHeader
           name={session.user.name ?? session.user.email}
           organizationName={session.organization.name}
+          image={session.user.image}
         />
 
         <main className="px-8 py-8">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 
+import { ProfileSettings } from "../../components/ProfileSettings";
 import { Sidebar } from "../../components/Sidebar";
 import {
   ApiError,
@@ -42,6 +43,14 @@ export default function SettingsPage() {
       .finally(() => setLoading(false));
   }, [router]);
 
+  function handleUserChange(updatedUser: SessionUser) {
+    if (!session) return;
+    setSession({ ...session, user: updatedUser });
+    setMembers((prev) =>
+      prev.map((m) => (m.id === updatedUser.id ? updatedUser : m)),
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-ink-950">
       <Sidebar />
@@ -59,6 +68,11 @@ export default function SettingsPage() {
 
         {session && (
           <div className="mt-8 max-w-2xl space-y-6">
+            <ProfileSettings
+              user={session.user}
+              onUserChange={handleUserChange}
+            />
+
             <section className="rounded-xl border border-grid-500/60 bg-ink-900 p-6">
               <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-amber-400">
                 Tu organización

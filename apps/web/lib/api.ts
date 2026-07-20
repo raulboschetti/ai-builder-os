@@ -1,10 +1,21 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
+// La API sirve los archivos subidos (avatares) fuera del prefijo /api/v1,
+// así que necesitamos el origen "pelado" para construir su URL completa.
+export const API_ORIGIN = API_BASE_URL.replace(/\/api\/v\d+$/, "");
+
+export function avatarUrl(image: string | null): string | null {
+  if (!image) return null;
+  if (image.startsWith("http")) return image; // avatar de Google, ya es absoluta
+  return `${API_ORIGIN}${image}`;
+}
+
 export interface SessionUser {
   id: string;
   name: string | null;
   email: string;
+  image?: string | null;
 }
 
 export interface SessionOrganization {
@@ -218,6 +229,41 @@ export function deleteProject(workspaceId: string, projectId: string) {
 
 export function listOrganizationUsers() {
   return authenticatedRequest<SessionUser[]>("/users");
+}
+
+export function updateProfile(data: { name?: string }) {
+  return authenticatedRequest<SessionUser>("/users/me", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function changePassword(data: {
+  currentPassword: string;
+  newPassword: string;
+}) {
+  return authenticatedRequest<void>("/users/me/password", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Subida de archivo: no puede pasar por authenticatedRequest porque esa
+ * función fuerza Content-Type: application/json. Aquí dejamos que el
+ * navegador ponga el Content-Type multipart con el boundary correcto.
+ */
+export async function uploadAvatar(file: File): Promise<SessionUser> {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const response = await fetch(`${API_BASE_URL}/users/me/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${getAccessToken()}` },
+    body: formData,
+  });
+
+  return parseResponse<SessionUser>(response);
 }
 
 export function createProject(

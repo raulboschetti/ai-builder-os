@@ -68,4 +68,17 @@ export class AuthService {
       },
     };
   }
+
+  /** Usado por GET /auth/me: reconstruye el contexto de sesión a partir del JWT ya validado. */
+  async getCurrentUser(userId: string, organizationId: string) {
+    const [profile, membership] = await Promise.all([
+      this.usersService.findById(userId),
+      this.organizationsService.findByIdForUser(organizationId, userId),
+    ]);
+
+    return {
+      user: profile,
+      organization: membership,
+    };
+  }
 }

@@ -37,6 +37,11 @@ export class UsersService {
     });
   }
 
+  async findById(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    return user ? UserMapper.toResponse(user) : null;
+  }
+
   /**
    * Crea el usuario y su organización propietaria en una única transacción.
    * Nunca debe existir un usuario sin al menos una organización: es la

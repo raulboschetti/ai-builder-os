@@ -89,7 +89,7 @@ export default function ProjectDetailPage() {
     <div className="flex min-h-screen bg-ink-950">
       <Sidebar />
 
-      <main className="flex-1 px-8 py-8">
+      <main className="flex-1 px-8 py-8 pt-16 md:pt-8">
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/"

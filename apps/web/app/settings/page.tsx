@@ -62,7 +62,7 @@ export default function SettingsPage() {
     <div className="flex min-h-screen bg-ink-950">
       <Sidebar />
 
-      <main className="flex-1 px-8 py-8">
+      <main className="flex-1 px-8 py-8 pt-16 md:pt-8">
         <div className="flex items-center justify-between">
           <h1 className="font-[family-name:var(--font-display)] text-2xl text-paper-50">
             Configuración

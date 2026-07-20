@@ -3,11 +3,19 @@
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 
 import { BuildStageTimeline } from "../../../components/BuildStageTimeline";
+import { EditProjectForm } from "../../../components/EditProjectForm";
 import { Sidebar } from "../../../components/Sidebar";
-import { ApiError, getAccessToken, getProject, Project } from "../../../lib/api";
+import {
+  ApiError,
+  deleteProject,
+  getAccessToken,
+  getProject,
+  Project,
+  updateProject,
+} from "../../../lib/api";
 
 export default function ProjectDetailPage() {
   const router = useRouter();
@@ -18,6 +26,8 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -43,6 +53,31 @@ export default function ProjectDetailPage() {
       .finally(() => setLoading(false));
   }, [router, workspaceId, params.id]);
 
+  async function handleUpdate(data: {
+    name: string;
+    businessVertical?: string;
+    description?: string;
+  }) {
+    if (!workspaceId || !project) return;
+    const updated = await updateProject(workspaceId, project.id, data);
+    setProject(updated);
+    setEditing(false);
+  }
+
+  async function handleDelete() {
+    if (!workspaceId || !project) return;
+    if (!confirm(`¿Seguro que quieres eliminar "${project.name}"?`)) return;
+
+    setDeleting(true);
+    try {
+      await deleteProject(workspaceId, project.id);
+      router.push("/");
+    } catch {
+      setError("No se ha podido eliminar el proyecto");
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-ink-950">
       <Sidebar />
@@ -62,16 +97,38 @@ export default function ProjectDetailPage() {
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
-        {project && (
+        {project && !editing && (
           <div className="max-w-2xl">
-            {project.businessVertical && (
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-cyan-400">
-                {project.businessVertical}
-              </p>
-            )}
-            <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl text-paper-50">
-              {project.name}
-            </h1>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                {project.businessVertical && (
+                  <p className="font-mono text-xs uppercase tracking-[0.2em] text-cyan-400">
+                    {project.businessVertical}
+                  </p>
+                )}
+                <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl text-paper-50">
+                  {project.name}
+                </h1>
+              </div>
+
+              <div className="flex shrink-0 gap-2">
+                <button
+                  onClick={() => setEditing(true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-grid-500 px-3 py-1.5 text-xs text-paper-200/80 transition hover:border-grid-400 hover:text-paper-50"
+                >
+                  <Pencil size={12} />
+                  Editar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex items-center gap-1.5 rounded-lg border border-red-900 px-3 py-1.5 text-xs text-red-400 transition hover:border-red-700 hover:text-red-300 disabled:opacity-50"
+                >
+                  <Trash2 size={12} />
+                  {deleting ? "Eliminando…" : "Eliminar"}
+                </button>
+              </div>
+            </div>
 
             <div className="mt-8 rounded-xl border border-grid-500/60 bg-ink-900 p-6">
               <BuildStageTimeline current={project.buildStage} />
@@ -93,6 +150,16 @@ export default function ProjectDetailPage() {
                 siguiente paso del roadmap.
               </p>
             </div>
+          </div>
+        )}
+
+        {project && editing && (
+          <div className="max-w-2xl">
+            <EditProjectForm
+              project={project}
+              onSubmit={handleUpdate}
+              onCancel={() => setEditing(false)}
+            />
           </div>
         )}
       </main>

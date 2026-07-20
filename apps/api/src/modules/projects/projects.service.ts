@@ -85,6 +85,52 @@ export class ProjectsService {
     return ProjectMapper.toResponse(project);
   }
 
+  async update(
+    organizationId: string,
+    workspaceId: string,
+    projectId: string,
+    data: {
+      name?: string;
+      businessVertical?: string;
+      description?: string;
+    },
+  ) {
+    // Reutiliza el mismo where con doble scoping: updateMany en vez de
+    // update para que, si el proyecto no pertenece a esta organización,
+    // simplemente no toque nada en lugar de lanzar un error de Prisma
+    // que podría filtrar si el registro existe en otro tenant.
+    const result = await this.prisma.project.updateMany({
+      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+      data: {
+        name: data.name,
+        businessVertical: data.businessVertical,
+        description: data.description,
+      },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    return this.findOneInWorkspace(organizationId, workspaceId, projectId);
+  }
+
+  /** Borrado lógico (deletedAt), no DELETE físico — conserva el histórico. */
+  async remove(
+    organizationId: string,
+    workspaceId: string,
+    projectId: string,
+  ) {
+    const result = await this.prisma.project.updateMany({
+      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+      data: { deletedAt: new Date() },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+  }
+
   private async assertWorkspaceInOrganization(
     organizationId: string,
     workspaceId: string,

@@ -195,6 +195,27 @@ export function getProject(workspaceId: string, projectId: string) {
   );
 }
 
+export function updateProject(
+  workspaceId: string,
+  projectId: string,
+  data: { name?: string; businessVertical?: string; description?: string },
+) {
+  return authenticatedRequest<Project>(
+    `/workspaces/${workspaceId}/projects/${projectId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+export function deleteProject(workspaceId: string, projectId: string) {
+  return authenticatedRequest<void>(
+    `/workspaces/${workspaceId}/projects/${projectId}`,
+    { method: "DELETE" },
+  );
+}
+
 export function listOrganizationUsers() {
   return authenticatedRequest<SessionUser[]>("/users");
 }

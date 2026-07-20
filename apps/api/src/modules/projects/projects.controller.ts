@@ -1,10 +1,21 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
 
 @ApiTags('Projects')
@@ -53,5 +64,32 @@ export class ProjectsController {
       businessVertical: body.businessVertical,
       description: body.description,
     });
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Editar un proyecto' })
+  @ApiBody({ type: UpdateProjectDto })
+  update(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @Body() body: UpdateProjectDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.update(user.organizationId, workspaceId, id, {
+      name: body.name,
+      businessVertical: body.businessVertical,
+      description: body.description,
+    });
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Eliminar un proyecto (borrado lógico)' })
+  remove(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.remove(user.organizationId, workspaceId, id);
   }
 }

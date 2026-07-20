@@ -12,6 +12,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import {
+  AuthenticatedUser,
+  CurrentUser,
+} from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
@@ -24,9 +28,9 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Obtener todos los usuarios' })
-  findAll() {
-    return this.usersService.findAll();
+  @ApiOperation({ summary: 'Obtener los usuarios de mi organización' })
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.findAllInOrganization(user.organizationId);
   }
 
   @Post()

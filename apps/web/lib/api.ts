@@ -189,6 +189,10 @@ export function listProjects(workspaceId: string) {
   );
 }
 
+export function listOrganizationUsers() {
+  return authenticatedRequest<SessionUser[]>("/users");
+}
+
 export function createProject(
   workspaceId: string,
   data: { name: string; businessVertical?: string; description?: string },

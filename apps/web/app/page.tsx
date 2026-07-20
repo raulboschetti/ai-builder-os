@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FolderKanban, Rocket, Users } from "lucide-react";
 
+import { DashboardHeader } from "../components/DashboardHeader";
 import { NewProjectForm } from "../components/NewProjectForm";
 import { ProjectCard } from "../components/ProjectCard";
+import { Sidebar } from "../components/Sidebar";
+import { StatCard } from "../components/StatCard";
 import {
   ApiError,
   createProject,
   createWorkspace,
   getAccessToken,
+  listOrganizationUsers,
   listProjects,
   listWorkspaces,
   me,
@@ -23,6 +28,7 @@ export default function HomePage() {
   const [session, setSession] = useState<MeResponse | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [teamSize, setTeamSize] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +62,12 @@ export default function HomePage() {
 
         setWorkspace(activeWorkspace);
 
-        const projectList = await listProjects(activeWorkspace.id);
+        const [projectList, users] = await Promise.all([
+          listProjects(activeWorkspace.id),
+          listOrganizationUsers(),
+        ]);
         setProjects(projectList);
+        setTeamSize(users.length);
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
           router.replace("/login");
@@ -99,56 +109,84 @@ export default function HomePage() {
     );
   }
 
+  const deployedCount = projects.filter(
+    (p) => p.buildStage === "DEPLOYED",
+  ).length;
+
   return (
-    <main className="blueprint-grid min-h-screen bg-ink-950 px-6 py-12 md:px-16">
-      <header className="mx-auto mb-10 flex max-w-4xl items-center justify-between">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-cyan-400">
-            {session.organization.name}
-          </p>
-          <h1 className="font-[family-name:var(--font-display)] text-2xl text-paper-50">
-            Tus proyectos
-          </h1>
-        </div>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-ink-950 transition hover:bg-amber-500"
-          >
-            + Nuevo proyecto
-          </button>
-        )}
-      </header>
+    <div className="flex min-h-screen bg-ink-950">
+      <Sidebar />
 
-      <div className="mx-auto max-w-4xl space-y-4">
-        {showForm && (
-          <NewProjectForm
-            onSubmit={handleCreateProject}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
+      <div className="flex-1">
+        <DashboardHeader
+          name={session.user.name ?? session.user.email}
+          organizationName={session.organization.name}
+        />
 
-        {projects.length === 0 && !showForm && (
-          <div className="rounded-xl border border-dashed border-grid-500 p-10 text-center">
-            <p className="text-paper-200/70">
-              Todavía no tienes ningún proyecto. Describe tu negocio y
-              empezamos a construirlo.
-            </p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-4 rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-ink-950 transition hover:bg-amber-500"
-            >
-              Crear el primero
-            </button>
+        <main className="px-8 py-8">
+          <div className="mb-8 grid gap-4 sm:grid-cols-3">
+            <StatCard
+              label="Proyectos"
+              value={projects.length}
+              icon={FolderKanban}
+            />
+            <StatCard
+              label="Publicados"
+              value={deployedCount}
+              icon={Rocket}
+            />
+            <StatCard
+              label="Miembros del equipo"
+              value={teamSize}
+              icon={Users}
+            />
           </div>
-        )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-[family-name:var(--font-display)] text-lg text-paper-50">
+              Tus proyectos
+            </h2>
+            {!showForm && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-ink-950 transition hover:bg-amber-500"
+              >
+                + Nuevo proyecto
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {showForm && (
+              <NewProjectForm
+                onSubmit={handleCreateProject}
+                onCancel={() => setShowForm(false)}
+              />
+            )}
+
+            {projects.length === 0 && !showForm && (
+              <div className="rounded-xl border border-dashed border-grid-500 p-10 text-center">
+                <p className="text-paper-200/70">
+                  Todavía no tienes ningún proyecto. Describe tu negocio y
+                  empezamos a construirlo.
+                </p>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="mt-4 rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-ink-950 transition hover:bg-amber-500"
+                >
+                  Crear el primero
+                </button>
+              </div>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {projects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }

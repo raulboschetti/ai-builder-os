@@ -20,10 +20,18 @@ export class EmailService {
     );
 
     if (!apiKey) {
+      const urls = [...params.html.matchAll(/href="([^"]+)"/g)].map(
+        (match) => match[1],
+      );
+
       this.logger.warn(
         `[SIN RESEND_API_KEY] Email no enviado de verdad. Para: ${params.to} — Asunto: ${params.subject}`,
       );
-      this.logger.warn(params.html.replace(/<[^>]+>/g, ' ').trim());
+      if (urls.length > 0) {
+        this.logger.warn(`Enlace: ${urls.join(', ')}`);
+      } else {
+        this.logger.warn(params.html.replace(/<[^>]+>/g, ' ').trim());
+      }
       return { simulated: true };
     }
 

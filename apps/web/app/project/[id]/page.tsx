@@ -8,12 +8,15 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { BuildStageTimeline } from "../../../components/BuildStageTimeline";
 import { EditProjectForm } from "../../../components/EditProjectForm";
 import { Sidebar } from "../../../components/Sidebar";
+import { UserMenu } from "../../../components/UserMenu";
 import {
   ApiError,
   deleteProject,
   getAccessToken,
   getProject,
+  me,
   Project,
+  SessionUser,
   updateProject,
 } from "../../../lib/api";
 
@@ -24,6 +27,7 @@ export default function ProjectDetailPage() {
   const workspaceId = searchParams.get("workspaceId");
 
   const [project, setProject] = useState<Project | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -41,8 +45,11 @@ export default function ProjectDetailPage() {
       return;
     }
 
-    getProject(workspaceId, params.id)
-      .then(setProject)
+    Promise.all([getProject(workspaceId, params.id), me()])
+      .then(([projectData, meResponse]) => {
+        setProject(projectData);
+        setUser(meResponse.user);
+      })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           router.replace("/login");
@@ -83,13 +90,18 @@ export default function ProjectDetailPage() {
       <Sidebar />
 
       <main className="flex-1 px-8 py-8">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-paper-200/60 hover:text-paper-50"
-        >
-          <ArrowLeft size={14} />
-          Volver a proyectos
-        </Link>
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-paper-200/60 hover:text-paper-50"
+          >
+            <ArrowLeft size={14} />
+            Volver a proyectos
+          </Link>
+          {user && (
+            <UserMenu name={user.name ?? user.email} image={user.image} />
+          )}
+        </div>
 
         {loading && (
           <p className="font-mono text-sm text-grid-400">Cargando…</p>

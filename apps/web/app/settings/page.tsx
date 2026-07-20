@@ -6,6 +6,7 @@ import { Users } from "lucide-react";
 
 import { ProfileSettings } from "../../components/ProfileSettings";
 import { Sidebar } from "../../components/Sidebar";
+import { UserMenu } from "../../components/UserMenu";
 import {
   ApiError,
   getAccessToken,
@@ -56,9 +57,17 @@ export default function SettingsPage() {
       <Sidebar />
 
       <main className="flex-1 px-8 py-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl text-paper-50">
-          Configuración
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl text-paper-50">
+            Configuración
+          </h1>
+          {session && (
+            <UserMenu
+              name={session.user.name ?? session.user.email}
+              image={session.user.image}
+            />
+          )}
+        </div>
 
         {loading && (
           <p className="mt-4 font-mono text-sm text-grid-400">Cargando…</p>

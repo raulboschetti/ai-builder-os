@@ -92,4 +92,32 @@ export class ProjectsController {
   ) {
     return this.projectsService.remove(user.organizationId, workspaceId, id);
   }
+
+  @Post(':id/analysis')
+  @ApiOperation({ summary: 'Generar un análisis de viabilidad con IA' })
+  generateAnalysis(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.generateAnalysis(
+      user.organizationId,
+      workspaceId,
+      id,
+    );
+  }
+
+  @Get(':id/analysis')
+  @ApiOperation({ summary: 'Obtener el análisis de viabilidad más reciente' })
+  getLatestAnalysis(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.getLatestAnalysis(
+      user.organizationId,
+      workspaceId,
+      id,
+    );
+  }
 }

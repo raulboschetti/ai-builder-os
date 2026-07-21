@@ -2,11 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { generateUniqueSlug } from '../../common/utils/slug.util';
 import { PrismaService } from '../../database/prisma.service';
+import { AiService } from '../ai/ai.service';
+import { ProjectAnalysisMapper } from './mappers/project-analysis.mapper';
 import { ProjectMapper } from './mappers/project.mapper';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly aiService: AiService,
+  ) {}
 
   /**
    * Doble aislamiento: cada consulta filtra por workspaceId Y, a través
@@ -142,5 +147,63 @@ export class ProjectsService {
     if (!workspace) {
       throw new NotFoundException('Workspace no encontrado');
     }
+  }
+
+  /**
+   * Pide a la IA un análisis de viabilidad del negocio descrito en el
+   * proyecto y lo guarda como una fila nueva (histórico, no se sobrescribe
+   * el análisis anterior).
+   */
+  async generateAnalysis(
+    organizationId: string,
+    workspaceId: string,
+    projectId: string,
+  ) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    const result = await this.aiService.generateBusinessAnalysis(
+      project.businessVertical,
+      project.description,
+    );
+
+    const analysis = await this.prisma.projectAnalysis.create({
+      data: {
+        projectId,
+        viability: result.viability,
+        summary: result.summary,
+        keyFeatures: result.keyFeatures,
+        risks: result.risks,
+      },
+    });
+
+    return ProjectAnalysisMapper.toResponse(analysis);
+  }
+
+  /** El análisis más reciente, o null si nunca se ha generado ninguno. */
+  async getLatestAnalysis(
+    organizationId: string,
+    workspaceId: string,
+    projectId: string,
+  ) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    const analysis = await this.prisma.projectAnalysis.findFirst({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return analysis ? ProjectAnalysisMapper.toResponse(analysis) : null;
   }
 }

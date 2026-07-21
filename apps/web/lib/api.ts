@@ -200,6 +200,28 @@ export function listProjects(workspaceId: string) {
   );
 }
 
+export interface ProjectAnalysis {
+  id: string;
+  viability: string;
+  summary: string;
+  keyFeatures: string[];
+  risks: string[];
+  createdAt: string;
+}
+
+export function generateAnalysis(workspaceId: string, projectId: string) {
+  return authenticatedRequest<ProjectAnalysis>(
+    `/workspaces/${workspaceId}/projects/${projectId}/analysis`,
+    { method: "POST" },
+  );
+}
+
+export function getLatestAnalysis(workspaceId: string, projectId: string) {
+  return authenticatedRequest<ProjectAnalysis | null>(
+    `/workspaces/${workspaceId}/projects/${projectId}/analysis`,
+  );
+}
+
 export function getProject(workspaceId: string, projectId: string) {
   return authenticatedRequest<Project>(
     `/workspaces/${workspaceId}/projects/${projectId}`,

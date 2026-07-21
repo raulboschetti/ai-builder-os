@@ -105,9 +105,26 @@ model Project {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   creator   User      @relation(fields: [createdBy], references: [id])
+  analyses  ProjectAnalysis[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId])
+}
+
+model ProjectAnalysis {
+  id        String @id @default(cuid())
+  projectId String
+
+  viability   String // veredicto corto: "Viable", "Viable con matices", "Necesita más información"...
+  summary     String   @db.Text
+  keyFeatures String[]
+  risks       String[]
+
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
 }
 
 model Membership {

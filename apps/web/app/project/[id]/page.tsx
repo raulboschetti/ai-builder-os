@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 
+import { AnalysisPanel } from "../../../components/AnalysisPanel";
 import { BuildStageTimeline } from "../../../components/BuildStageTimeline";
 import { EditProjectForm } from "../../../components/EditProjectForm";
 import { Sidebar } from "../../../components/Sidebar";
@@ -13,9 +14,11 @@ import {
   ApiError,
   deleteProject,
   getAccessToken,
+  getLatestAnalysis,
   getProject,
   me,
   Project,
+  ProjectAnalysis,
   SessionUser,
   updateProject,
 } from "../../../lib/api";
@@ -27,6 +30,7 @@ export default function ProjectDetailPage() {
   const workspaceId = searchParams.get("workspaceId");
 
   const [project, setProject] = useState<Project | null>(null);
+  const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,10 +49,15 @@ export default function ProjectDetailPage() {
       return;
     }
 
-    Promise.all([getProject(workspaceId, params.id), me()])
-      .then(([projectData, meResponse]) => {
+    Promise.all([
+      getProject(workspaceId, params.id),
+      me(),
+      getLatestAnalysis(workspaceId, params.id),
+    ])
+      .then(([projectData, meResponse, analysisData]) => {
         setProject(projectData);
         setUser(meResponse.user);
+        setAnalysis(analysisData);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -155,13 +164,13 @@ export default function ProjectDetailPage() {
               </p>
             </div>
 
-            <div className="mt-6 rounded-xl border border-dashed border-grid-500 p-6 text-center">
-              <p className="text-sm text-paper-200/60">
-                Aquí es donde la IA va a diseñar la arquitectura y empezar a
-                construir tu proyecto. Todavía no está conectado — es el
-                siguiente paso del roadmap.
-              </p>
-            </div>
+            {workspaceId && (
+              <AnalysisPanel
+                workspaceId={workspaceId}
+                projectId={project.id}
+                initialAnalysis={analysis}
+              />
+            )}
           </div>
         )}
 

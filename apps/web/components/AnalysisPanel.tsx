@@ -131,6 +131,17 @@ export function AnalysisPanel({
         </div>
       )}
 
+      {analysis.recommendation && (
+        <div className="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/5 p-3">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-amber-400">
+            Siguiente paso
+          </p>
+          <p className="mt-1.5 text-sm text-paper-50">
+            {analysis.recommendation}
+          </p>
+        </div>
+      )}
+
       {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
     </div>
   );

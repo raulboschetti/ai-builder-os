@@ -179,6 +179,7 @@ export class ProjectsService {
         summary: result.summary,
         keyFeatures: result.keyFeatures,
         risks: result.risks,
+        recommendation: result.recommendation,
       },
     });
 

@@ -7,6 +7,7 @@ export interface BusinessAnalysisResult {
   summary: string;
   keyFeatures: string[];
   risks: string[];
+  recommendation: string;
 }
 
 const MODEL = 'claude-sonnet-5';
@@ -50,7 +51,7 @@ export class AiService {
     businessVertical: string | null,
     description: string | null,
   ): string {
-    return `Eres un analista de negocio pragmático que ayuda a emprendedores no técnicos a evaluar si su idea merece construirse como aplicación/web.
+    return `Eres un analista de negocio pragmático que ayuda a emprendedores no técnicos a evaluar si su idea merece construirse como aplicación/web. Sé objetivo con el veredicto — no exageres la viabilidad para quedar bien — pero nunca dejes al usuario sin un camino a seguir: pase lo que pase, tiene que salir de aquí sabiendo qué hacer a continuación.
 
 Vertical de negocio: ${businessVertical || 'no especificado'}
 Descripción que ha dado el dueño del negocio: ${description || 'no especificada'}
@@ -60,7 +61,8 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
   "viability": "una frase corta tipo veredicto, ej: 'Viable' / 'Viable con matices' / 'Necesita más información'",
   "summary": "2-3 frases explicando el porqué, en español, dirigidas a alguien sin conocimientos técnicos",
   "keyFeatures": ["3 a 5 funcionalidades concretas que necesitaría la aplicación"],
-  "risks": ["1 a 3 riesgos o cosas a tener en cuenta, en lenguaje sencillo"]
+  "risks": ["1 a 3 riesgos o cosas a tener en cuenta, en lenguaje sencillo"],
+  "recommendation": "2-3 frases con el siguiente paso concreto. Si es viable, cómo empezar. Si no lo es tal cual está planteado, qué cambiar o reducir para que sí lo sea — nunca lo dejes en un simple 'no'"
 }`;
   }
 
@@ -80,6 +82,7 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
           ? parsed.keyFeatures.map(String)
           : [],
         risks: Array.isArray(parsed.risks) ? parsed.risks.map(String) : [],
+        recommendation: String(parsed.recommendation ?? ''),
       };
     } catch {
       this.logger.error(`No se pudo interpretar la respuesta de la IA: ${text}`);

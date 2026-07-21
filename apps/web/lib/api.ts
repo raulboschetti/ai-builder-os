@@ -206,6 +206,7 @@ export interface ProjectAnalysis {
   summary: string;
   keyFeatures: string[];
   risks: string[];
+  recommendation: string;
   createdAt: string;
 }
 

@@ -119,6 +119,7 @@ model ProjectAnalysis {
   summary     String   @db.Text
   keyFeatures String[]
   risks       String[]
+  recommendation String @db.Text // camino a seguir siempre, sea viable o no — nunca un callejón sin salida
 
   createdAt DateTime @default(now())
 

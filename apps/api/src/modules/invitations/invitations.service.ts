@@ -31,8 +31,36 @@ export class InvitationsService {
    * Crea una invitación y envía el email. Siempre se scopea a la
    * organización del que llama (viene del JWT, nunca del body).
    */
-  async create(organizationId: string, invitedBy: string, email: string) {
+  async create(
+    organizationId: string,
+    invitedBy: string,
+    email: string,
+    options?: { role?: 'MEMBER' | 'CLIENT'; projectId?: string },
+  ) {
     const normalizedEmail = email.trim().toLowerCase();
+    const role = options?.role === 'CLIENT' ? MembershipRole.CLIENT : MembershipRole.MEMBER;
+
+    if (role === MembershipRole.CLIENT) {
+      if (!options?.projectId) {
+        throw new BadRequestException(
+          'Falta el proyecto al que dar acceso de cliente',
+        );
+      }
+
+      // El proyecto tiene que pertenecer a esta organización — mismo tipo
+      // de comprobación de aislamiento que en el resto de la app.
+      const project = await this.prisma.project.findFirst({
+        where: {
+          id: options.projectId,
+          deletedAt: null,
+          workspace: { organizationId, deletedAt: null },
+        },
+      });
+
+      if (!project) {
+        throw new NotFoundException('Proyecto no encontrado');
+      }
+    }
 
     const alreadyMember = await this.prisma.membership.findFirst({
       where: { organizationId, user: { email: normalizedEmail } },
@@ -67,25 +95,38 @@ export class InvitationsService {
       data: {
         organizationId,
         email: normalizedEmail,
-        role: MembershipRole.MEMBER,
+        role,
+        projectId: role === MembershipRole.CLIENT ? options?.projectId : null,
         token,
         invitedBy,
         expiresAt,
       },
-      include: { organization: true },
+      include: { organization: true, project: true },
     });
 
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
     const inviteUrl = `${frontendUrl}/invite/${token}`;
 
+    const html =
+      role === MembershipRole.CLIENT
+        ? `
+          <p>Ya puedes seguir el estado de <strong>${invitation.project?.name}</strong> en Kroquix.</p>
+          <p><a href="${inviteUrl}">Acceder</a></p>
+          <p>Este enlace caduca en ${INVITATION_TTL_DAYS} días.</p>
+        `
+        : `
+          <p>Te han invitado a unirte a <strong>${invitation.organization.name}</strong> en Kroquix.</p>
+          <p><a href="${inviteUrl}">Aceptar invitación</a></p>
+          <p>Este enlace caduca en ${INVITATION_TTL_DAYS} días.</p>
+        `;
+
     await this.emailService.send({
       to: normalizedEmail,
-      subject: `Te han invitado a ${invitation.organization.name} en Kroquix`,
-      html: `
-        <p>Te han invitado a unirte a <strong>${invitation.organization.name}</strong> en Kroquix.</p>
-        <p><a href="${inviteUrl}">Aceptar invitación</a></p>
-        <p>Este enlace caduca en ${INVITATION_TTL_DAYS} días.</p>
-      `,
+      subject:
+        role === MembershipRole.CLIENT
+          ? `Acceso a ${invitation.project?.name} en Kroquix`
+          : `Te han invitado a ${invitation.organization.name} en Kroquix`,
+      html,
     });
 
     return InvitationMapper.toResponse(invitation);
@@ -118,6 +159,8 @@ export class InvitationsService {
     return {
       email: invitation.email,
       organizationName: invitation.organization.name,
+      isClient: invitation.role === MembershipRole.CLIENT,
+      projectName: invitation.project?.name ?? null,
     };
   }
 
@@ -159,6 +202,10 @@ export class InvitationsService {
           userId: user.id,
           organizationId: invitation.organizationId,
           role: invitation.role,
+          clientProjectId:
+            invitation.role === MembershipRole.CLIENT
+              ? invitation.projectId
+              : null,
         },
       });
 
@@ -181,7 +228,7 @@ export class InvitationsService {
   private async findValidInvitation(token: string) {
     const invitation = await this.prisma.invitation.findUnique({
       where: { token },
-      include: { organization: true },
+      include: { organization: true, project: true },
     });
 
     if (!invitation) {

@@ -116,7 +116,12 @@ export class AuthService {
   }
 
   /** Usado por GET /auth/me: reconstruye el contexto de sesión a partir del JWT ya validado. */
-  async getCurrentUser(userId: string, organizationId: string) {
+  async getCurrentUser(
+    userId: string,
+    organizationId: string,
+    role: string,
+    clientProjectId?: string | null,
+  ) {
     const [profile, membership] = await Promise.all([
       this.usersService.findById(userId),
       this.organizationsService.findByIdForUser(organizationId, userId),
@@ -124,7 +129,7 @@ export class AuthService {
 
     return {
       user: profile,
-      organization: membership,
+      organization: { ...membership, role, clientProjectId },
     };
   }
 
@@ -139,6 +144,7 @@ export class AuthService {
       email: user.email,
       organizationId: membership.organizationId,
       role: membership.role,
+      clientProjectId: membership.clientProjectId,
     };
 
     const accessToken = this.tokenService.generateAccessToken(payload);
@@ -158,6 +164,7 @@ export class AuthService {
         name: membership.organization.name,
         slug: membership.organization.slug,
         role: membership.role,
+        clientProjectId: membership.clientProjectId,
       },
     };
   }

@@ -43,7 +43,7 @@ export default function InvitePage() {
     try {
       const auth = await acceptInvitation(params.token, { name, password });
       storeSession(auth);
-      router.push("/");
+      router.push(auth.organization.role === "CLIENT" ? "/client" : "/");
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -73,8 +73,16 @@ export default function InvitePage() {
   return (
     <AuthLayout
       eyebrow="Invitación"
-      title={`Únete a ${invitation.organizationName}`}
-      subtitle="Crea tu contraseña para entrar al equipo."
+      title={
+        invitation.isClient
+          ? `Accede a ${invitation.projectName}`
+          : `Únete a ${invitation.organizationName}`
+      }
+      subtitle={
+        invitation.isClient
+          ? "Crea tu contraseña para ver el estado de tu proyecto."
+          : "Crea tu contraseña para entrar al equipo."
+      }
       footer={<>Vas a entrar con {invitation.email}</>}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -111,7 +119,11 @@ export default function InvitePage() {
           disabled={submitting}
           className="mt-2 rounded-lg bg-ink-950 px-4 py-2.5 text-sm font-medium text-paper-50 transition hover:bg-ink-800 disabled:opacity-50"
         >
-          {submitting ? "Uniéndote…" : "Unirme al equipo"}
+          {submitting
+            ? "Entrando…"
+            : invitation.isClient
+              ? "Acceder"
+              : "Unirme al equipo"}
         </button>
       </form>
     </AuthLayout>

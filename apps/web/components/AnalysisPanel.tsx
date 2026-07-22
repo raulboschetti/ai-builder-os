@@ -27,10 +27,12 @@ export function AnalysisPanel({
   workspaceId,
   projectId,
   initialAnalysis,
+  readOnly = false,
 }: {
   workspaceId: string;
   projectId: string;
   initialAnalysis: ProjectAnalysis | null;
+  readOnly?: boolean;
 }) {
   const [analysis, setAnalysis] = useState(initialAnalysis);
   const [loading, setLoading] = useState(false);
@@ -52,6 +54,16 @@ export function AnalysisPanel({
   }
 
   if (!analysis) {
+    if (readOnly) {
+      return (
+        <div className="mt-6 rounded-xl border border-dashed border-grid-500 p-6 text-center">
+          <p className="text-sm text-paper-200/60">
+            Todavía no hay un análisis de viabilidad para este proyecto.
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="mt-6 rounded-xl border border-dashed border-grid-500 p-6 text-center">
         <p className="text-sm text-paper-200/60">
@@ -77,15 +89,17 @@ export function AnalysisPanel({
         <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-grid-400">
           Análisis de viabilidad (IA)
         </p>
-        <button
-          onClick={handleAnalyze}
-          disabled={loading}
-          title="Volver a analizar"
-          className="flex items-center gap-1.5 text-xs text-paper-200/60 transition hover:text-paper-50 disabled:opacity-50"
-        >
-          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-          {loading ? "Analizando…" : "Repetir"}
-        </button>
+        {!readOnly && (
+          <button
+            onClick={handleAnalyze}
+            disabled={loading}
+            title="Volver a analizar"
+            className="flex items-center gap-1.5 text-xs text-paper-200/60 transition hover:text-paper-50 disabled:opacity-50"
+          >
+            <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+            {loading ? "Analizando…" : "Repetir"}
+          </button>
+        )}
       </div>
 
       <div className="mt-3 flex items-center gap-2">

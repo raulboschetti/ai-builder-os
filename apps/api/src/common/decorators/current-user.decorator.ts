@@ -5,6 +5,8 @@ export interface AuthenticatedUser {
   email: string;
   organizationId: string;
   role: string;
+  /** Solo presente cuando role === 'CLIENT' — a qué proyecto está limitado. */
+  clientProjectId?: string | null;
 }
 
 /**

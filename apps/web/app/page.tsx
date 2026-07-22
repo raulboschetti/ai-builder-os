@@ -44,6 +44,11 @@ export default function HomePage() {
         const meResponse = await me();
         setSession(meResponse);
 
+        if (meResponse.organization.role === "CLIENT") {
+          router.replace("/client");
+          return;
+        }
+
         let workspaces = await listWorkspaces();
 
         // Primera visita: no hay ningún workspace todavía, se crea uno por

@@ -21,6 +21,7 @@ import { extname } from 'path';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
+import { BlockClientRoleGuard } from '../../common/guards/block-client-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -33,7 +34,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, BlockClientRoleGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Obtener los usuarios de mi organización' })
   findAll(@CurrentUser() user: AuthenticatedUser) {

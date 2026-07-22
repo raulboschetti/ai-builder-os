@@ -46,7 +46,12 @@ export class AuthController {
     summary: 'Usuario y organización activa de la sesión actual',
   })
   me(@CurrentUser() user: AuthenticatedUser) {
-    return this.authService.getCurrentUser(user.id, user.organizationId);
+    return this.authService.getCurrentUser(
+      user.id,
+      user.organizationId,
+      user.role,
+      user.clientProjectId,
+    );
   }
 
   @Get('google')

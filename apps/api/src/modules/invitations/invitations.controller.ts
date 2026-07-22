@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { AuthService } from '../auth/auth.service';
+import { BlockClientRoleGuard } from '../../common/guards/block-client-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
@@ -28,7 +29,7 @@ import { InvitationsService } from './invitations.service';
  */
 @ApiTags('Invitations')
 @Controller('invitations')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, BlockClientRoleGuard)
 @ApiBearerAuth('access-token')
 export class OrganizationInvitationsController {
   constructor(private readonly invitationsService: InvitationsService) {}
@@ -50,6 +51,7 @@ export class OrganizationInvitationsController {
       user.organizationId,
       user.id,
       body.email,
+      { role: body.role, projectId: body.projectId },
     );
   }
 

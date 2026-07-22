@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
+import { BlockClientRoleGuard } from '../../common/guards/block-client-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -20,7 +21,7 @@ import { ProjectsService } from './projects.service';
 
 @ApiTags('Projects')
 @Controller('workspaces/:workspaceId/projects')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, BlockClientRoleGuard)
 @ApiBearerAuth('access-token')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}

@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
+import { BlockClientRoleGuard } from '../../common/guards/block-client-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -11,7 +12,7 @@ import { OrganizationsService } from './organizations.service';
 
 @ApiTags('Organizations')
 @Controller('organizations')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, BlockClientRoleGuard)
 @ApiBearerAuth('access-token')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}

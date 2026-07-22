@@ -23,6 +23,7 @@ export interface SessionOrganization {
   name: string;
   slug: string;
   role: string;
+  clientProjectId?: string | null;
 }
 
 export interface AuthResponse {
@@ -176,7 +177,7 @@ export function register(data: {
 
 export interface MeResponse {
   user: SessionUser;
-  organization: { id: string; name: string; slug: string };
+  organization: SessionOrganization;
 }
 
 export function me() {
@@ -288,14 +289,29 @@ export function listOrganizationUsers() {
   return authenticatedRequest<SessionUser[]>("/users");
 }
 
+export interface ClientProject extends Project {
+  organizationName: string;
+}
+
+export function getClientProject() {
+  return authenticatedRequest<ClientProject>("/client/project");
+}
+
+export function getClientAnalysis() {
+  return authenticatedRequest<ProjectAnalysis | null>("/client/analysis");
+}
+
 export function listInvitations() {
   return authenticatedRequest<Invitation[]>("/invitations");
 }
 
-export function createInvitation(email: string) {
+export function createInvitation(
+  email: string,
+  options?: { role?: "MEMBER" | "CLIENT"; projectId?: string },
+) {
   return authenticatedRequest<Invitation>("/invitations", {
     method: "POST",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, ...options }),
   });
 }
 
@@ -308,6 +324,8 @@ export function revokeInvitation(id: string) {
 export interface InvitationPreview {
   email: string;
   organizationName: string;
+  isClient: boolean;
+  projectName: string | null;
 }
 
 export function getInvitation(token: string) {

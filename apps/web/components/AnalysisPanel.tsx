@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2, RefreshCw, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  PiggyBank,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 
 import { generateAnalysis, ProjectAnalysis } from "../lib/api";
 
@@ -128,6 +134,24 @@ export function AnalysisPanel({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {analysis.marketCostEstimate && (
+        <div className="mt-4 rounded-lg border border-cyan-400/30 bg-cyan-400/5 p-3">
+          <div className="flex items-center gap-1.5">
+            <PiggyBank size={13} className="text-cyan-400" />
+            <p className="font-mono text-[10px] uppercase tracking-wide text-cyan-400">
+              Coste si lo contrataras fuera
+            </p>
+          </div>
+          <p className="mt-1.5 text-sm text-paper-200/80">
+            {analysis.marketCostEstimate}
+          </p>
+          <p className="mt-2 text-xs text-paper-200/50">
+            Estimación orientativa. Con Kroquix esto se construye directamente
+            en la plataforma, sin tener que contratar a nadie por tu cuenta.
+          </p>
         </div>
       )}
 

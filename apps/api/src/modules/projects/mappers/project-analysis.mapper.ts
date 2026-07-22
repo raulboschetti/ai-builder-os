@@ -9,6 +9,7 @@ export class ProjectAnalysisMapper {
       keyFeatures: analysis.keyFeatures,
       risks: analysis.risks,
       recommendation: analysis.recommendation,
+      marketCostEstimate: analysis.marketCostEstimate,
       createdAt: analysis.createdAt,
     };
   }

@@ -8,6 +8,7 @@ export interface BusinessAnalysisResult {
   keyFeatures: string[];
   risks: string[];
   recommendation: string;
+  marketCostEstimate: string;
 }
 
 const MODEL = 'claude-sonnet-5';
@@ -64,7 +65,8 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
   "summary": "2-3 frases explicando el porqué, en español, dirigidas a alguien sin conocimientos técnicos",
   "keyFeatures": ["3 a 5 funcionalidades concretas que necesitaría la aplicación"],
   "risks": ["1 a 3 riesgos o cosas a tener en cuenta, en lenguaje sencillo"],
-  "recommendation": "2-3 frases con el siguiente paso concreto A CONSTRUIR EN KROQUIX. Si es viable tal cual, qué funcionalidades empezar construyendo primero. Si es demasiado ambicioso, qué versión reducida construir primero para validarlo. Nunca sugieras herramientas de fuera"
+  "recommendation": "2-3 frases con el siguiente paso concreto A CONSTRUIR EN KROQUIX. Si es viable tal cual, qué funcionalidades empezar construyendo primero. Si es demasiado ambicioso, qué versión reducida construir primero para validarlo. Nunca sugieras herramientas de fuera",
+  "marketCostEstimate": "Estimación REALISTA (ni inflada ni a la baja) de lo que costaría contratar a un desarrollador freelance o una agencia en España para construir estas funcionalidades concretas: un rango en euros de desarrollo inicial, y otro rango de mantenimiento mensual aproximado. 1-2 frases, cifras concretas basadas en las funcionalidades listadas arriba, no genéricas"
 }`;
   }
 
@@ -85,6 +87,7 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
           : [],
         risks: Array.isArray(parsed.risks) ? parsed.risks.map(String) : [],
         recommendation: String(parsed.recommendation ?? ''),
+        marketCostEstimate: String(parsed.marketCostEstimate ?? ''),
       };
     } catch {
       this.logger.error(`No se pudo interpretar la respuesta de la IA: ${text}`);

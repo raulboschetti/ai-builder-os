@@ -120,6 +120,7 @@ model ProjectAnalysis {
   keyFeatures String[]
   risks       String[]
   recommendation String @db.Text // camino a seguir siempre, sea viable o no — nunca un callejón sin salida
+  marketCostEstimate String @db.Text // estimación orientativa de coste con un desarrollador/agencia tradicional
 
   createdAt DateTime @default(now())
 

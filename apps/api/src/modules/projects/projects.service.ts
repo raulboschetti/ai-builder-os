@@ -180,6 +180,7 @@ export class ProjectsService {
         keyFeatures: result.keyFeatures,
         risks: result.risks,
         recommendation: result.recommendation,
+        marketCostEstimate: result.marketCostEstimate,
       },
     });
 

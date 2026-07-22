@@ -149,8 +149,8 @@ export function AnalysisPanel({
             {analysis.marketCostEstimate}
           </p>
           <p className="mt-2 text-xs text-paper-200/50">
-            Estimación orientativa. Con Kroquix esto se construye directamente
-            en la plataforma, sin tener que contratar a nadie por tu cuenta.
+            Referencia de precio de mercado — no es lo que vas a pagar tú,
+            ni de lejos.
           </p>
         </div>
       )}

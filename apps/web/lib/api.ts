@@ -281,6 +281,7 @@ export interface Invitation {
   email: string;
   role: string;
   status: string;
+  projectId?: string | null;
   expiresAt: string;
   createdAt: string;
 }

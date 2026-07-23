@@ -8,6 +8,7 @@ export class InvitationMapper {
       email: invitation.email,
       role: invitation.role,
       status: invitation.status,
+      projectId: invitation.projectId,
       expiresAt: invitation.expiresAt,
       createdAt: invitation.createdAt,
     };

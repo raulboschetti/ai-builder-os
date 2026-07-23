@@ -8,6 +8,7 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { AnalysisPanel } from "../../../components/AnalysisPanel";
 import { BuildStageTimeline } from "../../../components/BuildStageTimeline";
 import { EditProjectForm } from "../../../components/EditProjectForm";
+import { InviteClient } from "../../../components/InviteClient";
 import { Sidebar } from "../../../components/Sidebar";
 import { HeaderActions } from "../../../components/HeaderActions";
 import {
@@ -16,6 +17,8 @@ import {
   getAccessToken,
   getLatestAnalysis,
   getProject,
+  Invitation,
+  listInvitations,
   me,
   Project,
   ProjectAnalysis,
@@ -31,6 +34,7 @@ export default function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,11 +57,13 @@ export default function ProjectDetailPage() {
       getProject(workspaceId, params.id),
       me(),
       getLatestAnalysis(workspaceId, params.id),
+      listInvitations(),
     ])
-      .then(([projectData, meResponse, analysisData]) => {
+      .then(([projectData, meResponse, analysisData, invitationsData]) => {
         setProject(projectData);
         setUser(meResponse.user);
         setAnalysis(analysisData);
+        setInvitations(invitationsData);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -171,6 +177,12 @@ export default function ProjectDetailPage() {
                 initialAnalysis={analysis}
               />
             )}
+
+            <InviteClient
+              projectId={project.id}
+              invitations={invitations}
+              onInvitationsChange={setInvitations}
+            />
           </div>
         )}
 

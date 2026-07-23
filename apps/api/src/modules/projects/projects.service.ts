@@ -208,4 +208,56 @@ export class ProjectsService {
 
     return analysis ? ProjectAnalysisMapper.toResponse(analysis) : null;
   }
+
+  /** Clientes con acceso YA aceptado a este proyecto (no las invitaciones pendientes). */
+  async listClients(
+    organizationId: string,
+    workspaceId: string,
+    projectId: string,
+  ) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    const memberships = await this.prisma.membership.findMany({
+      where: { clientProjectId: projectId },
+      include: { user: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return memberships.map((m) => ({
+      membershipId: m.id,
+      name: m.user.name,
+      email: m.user.email,
+      createdAt: m.createdAt,
+    }));
+  }
+
+  /** Quita el acceso de un cliente concreto a este proyecto (borra su membership). */
+  async revokeClientAccess(
+    organizationId: string,
+    workspaceId: string,
+    projectId: string,
+    membershipId: string,
+  ) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    const result = await this.prisma.membership.deleteMany({
+      where: { id: membershipId, clientProjectId: projectId },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('Acceso de cliente no encontrado');
+    }
+  }
 }

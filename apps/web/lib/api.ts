@@ -225,6 +225,30 @@ export function getLatestAnalysis(workspaceId: string, projectId: string) {
   );
 }
 
+export interface ProjectClientAccess {
+  membershipId: string;
+  name: string | null;
+  email: string;
+  createdAt: string;
+}
+
+export function listProjectClients(workspaceId: string, projectId: string) {
+  return authenticatedRequest<ProjectClientAccess[]>(
+    `/workspaces/${workspaceId}/projects/${projectId}/clients`,
+  );
+}
+
+export function revokeClientAccess(
+  workspaceId: string,
+  projectId: string,
+  membershipId: string,
+) {
+  return authenticatedRequest<void>(
+    `/workspaces/${workspaceId}/projects/${projectId}/clients/${membershipId}`,
+    { method: "DELETE" },
+  );
+}
+
 export function getProject(workspaceId: string, projectId: string) {
   return authenticatedRequest<Project>(
     `/workspaces/${workspaceId}/projects/${projectId}`,

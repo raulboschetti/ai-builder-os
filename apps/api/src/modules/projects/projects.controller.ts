@@ -121,4 +121,31 @@ export class ProjectsController {
       id,
     );
   }
+
+  @Get(':id/clients')
+  @ApiOperation({ summary: 'Listar clientes con acceso ya aceptado a este proyecto' })
+  listClients(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.listClients(user.organizationId, workspaceId, id);
+  }
+
+  @Delete(':id/clients/:membershipId')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Quitar el acceso de un cliente a este proyecto' })
+  revokeClientAccess(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @Param('membershipId') membershipId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.projectsService.revokeClientAccess(
+      user.organizationId,
+      workspaceId,
+      id,
+      membershipId,
+    );
+  }
 }

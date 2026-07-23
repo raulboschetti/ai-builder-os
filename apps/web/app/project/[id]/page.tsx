@@ -178,11 +178,14 @@ export default function ProjectDetailPage() {
               />
             )}
 
-            <InviteClient
-              projectId={project.id}
-              invitations={invitations}
-              onInvitationsChange={setInvitations}
-            />
+            {workspaceId && (
+              <InviteClient
+                workspaceId={workspaceId}
+                projectId={project.id}
+                invitations={invitations}
+                onInvitationsChange={setInvitations}
+              />
+            )}
           </div>
         )}
 

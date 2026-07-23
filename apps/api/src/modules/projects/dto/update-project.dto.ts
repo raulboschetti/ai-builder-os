@@ -17,4 +17,13 @@ export class UpdateProjectDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Formato Twilio, ej: "whatsapp:+14155238886". Solo un proyecto puede tener cada número asignado.',
+  })
+  @IsOptional()
+  @IsString()
+  whatsappNumber?: string;
 }

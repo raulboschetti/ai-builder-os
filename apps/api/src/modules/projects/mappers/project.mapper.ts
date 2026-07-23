@@ -10,6 +10,7 @@ export class ProjectMapper {
       status: project.status,
       businessVertical: project.businessVertical,
       description: project.description,
+      whatsappNumber: project.whatsappNumber,
       buildStage: project.buildStage,
       createdBy: project.createdBy,
       createdAt: project.createdAt,

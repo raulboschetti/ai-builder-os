@@ -11,6 +11,7 @@ export function EditProjectForm({
     name: string;
     businessVertical?: string;
     description?: string;
+    whatsappNumber?: string;
   }) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -19,6 +20,9 @@ export function EditProjectForm({
     project.businessVertical ?? "",
   );
   const [description, setDescription] = useState(project.description ?? "");
+  const [whatsappNumber, setWhatsappNumber] = useState(
+    project.whatsappNumber ?? "",
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +36,7 @@ export function EditProjectForm({
         name,
         businessVertical: businessVertical || undefined,
         description: description || undefined,
+        whatsappNumber: whatsappNumber || undefined,
       });
     } catch {
       setError("No se han podido guardar los cambios");
@@ -70,6 +75,18 @@ export function EditProjectForm({
         rows={3}
         className="mt-2 w-full resize-none rounded-lg border border-grid-500 bg-ink-950 px-3 py-2 text-sm text-paper-50 placeholder:text-grid-400 outline-none focus:border-amber-400"
       />
+
+      <label className="mt-3 block">
+        <span className="font-mono text-[10px] uppercase tracking-wide text-grid-400">
+          Número de WhatsApp del agente (opcional)
+        </span>
+        <input
+          placeholder="whatsapp:+14155238886"
+          value={whatsappNumber}
+          onChange={(e) => setWhatsappNumber(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-grid-500 bg-ink-950 px-3 py-2 text-sm text-paper-50 placeholder:text-grid-400 outline-none focus:border-amber-400"
+        />
+      </label>
 
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
 

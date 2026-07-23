@@ -7,14 +7,11 @@ import { AiService } from '../ai/ai.service';
 const HISTORY_LIMIT = 10;
 
 /**
- * Prototipo de agente — todavía no está atado a un proyecto/cliente
- * concreto (eso requiere mapear cada número de WhatsApp de negocio a
- * un Project, que es el siguiente paso natural una vez que este
- * primer flujo end-to-end funcione). Por ahora, un único agente de
- * demostración para probar que la tubería completa (Twilio → IA →
- * Twilio) funciona de verdad.
+ * Se usa solo si el número al que ha escrito el cliente no está asignado
+ * a ningún proyecto todavía — evita que el webhook falle en vez de dar
+ * una respuesta razonable durante las pruebas.
  */
-const DEMO_SYSTEM_PROMPT = `Eres el asistente de WhatsApp de una clínica dental de demostración en Kroquix. Ayudas a los pacientes a entender cómo pedir cita (de momento no puedes reservar de verdad, esto es un prototipo). Responde en español, en 2-3 frases como mucho — es WhatsApp, no un email. Sé amable y directo.`;
+const FALLBACK_SYSTEM_PROMPT = `Eres el asistente de WhatsApp de un negocio en Kroquix (todavía sin configurar del todo). Responde en español, en 2-3 frases como mucho — es WhatsApp, no un email. Sé amable y directo, y si no tienes información concreta del negocio, dilo con naturalidad en vez de inventarte datos.`;
 
 @Injectable()
 export class WhatsAppService {
@@ -26,6 +23,7 @@ export class WhatsAppService {
   async handleIncomingMessage(
     phoneNumber: string,
     body: string,
+    toNumber: string,
   ): Promise<string> {
     await this.prisma.whatsAppMessage.create({
       data: {
@@ -48,8 +46,20 @@ export class WhatsAppService {
         content: m.content,
       }));
 
+    const project = await this.prisma.project.findUnique({
+      where: { whatsappNumber: toNumber },
+    });
+
+    const systemPrompt = project
+      ? this.buildProjectSystemPrompt(
+          project.name,
+          project.businessVertical,
+          project.description,
+        )
+      : FALLBACK_SYSTEM_PROMPT;
+
     const reply = await this.aiService.generateAgentReply(
-      DEMO_SYSTEM_PROMPT,
+      systemPrompt,
       history,
     );
 
@@ -62,5 +72,17 @@ export class WhatsAppService {
     });
 
     return reply;
+  }
+
+  private buildProjectSystemPrompt(
+    name: string,
+    businessVertical: string | null,
+    description: string | null,
+  ): string {
+    return `Eres el asistente de WhatsApp de "${name}"${businessVertical ? ` (${businessVertical})` : ''} en Kroquix.
+
+Contexto del negocio: ${description || 'sin descripción detallada todavía'}
+
+Ayuda a los clientes de este negocio con sus dudas y a entender cómo pedir cita o usar el servicio (de momento no puedes reservar de verdad, esto es un prototipo). Responde en español, en 2-3 frases como mucho — es WhatsApp, no un email. Sé amable y directo, y no inventes datos del negocio que no te he dado aquí.`;
   }
 }

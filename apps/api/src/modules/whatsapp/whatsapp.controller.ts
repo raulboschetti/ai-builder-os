@@ -39,11 +39,13 @@ export class WhatsAppController {
     }
 
     const from = body.From ?? '';
+    const to = body.To ?? '';
     const messageBody = body.Body ?? '';
 
     const reply = await this.whatsAppService.handleIncomingMessage(
       from,
       messageBody,
+      to,
     );
 
     const twiml = new twilio.twiml.MessagingResponse();

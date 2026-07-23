@@ -59,6 +59,7 @@ export interface Project {
   status: ProjectStatus;
   businessVertical: string | null;
   description: string | null;
+  whatsappNumber: string | null;
   buildStage: ProjectBuildStage;
   createdBy: string;
   createdAt: string;
@@ -289,7 +290,12 @@ export function getProject(workspaceId: string, projectId: string) {
 export function updateProject(
   workspaceId: string,
   projectId: string,
-  data: { name?: string; businessVertical?: string; description?: string },
+  data: {
+    name?: string;
+    businessVertical?: string;
+    description?: string;
+    whatsappNumber?: string;
+  },
 ) {
   return authenticatedRequest<Project>(
     `/workspaces/${workspaceId}/projects/${projectId}`,

@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { generateUniqueSlug } from '../../common/utils/slug.util';
 import { PrismaService } from '../../database/prisma.service';
@@ -98,20 +99,35 @@ export class ProjectsService {
       name?: string;
       businessVertical?: string;
       description?: string;
+      whatsappNumber?: string;
     },
   ) {
     // Reutiliza el mismo where con doble scoping: updateMany en vez de
     // update para que, si el proyecto no pertenece a esta organización,
     // simplemente no toque nada en lugar de lanzar un error de Prisma
     // que podría filtrar si el registro existe en otro tenant.
-    const result = await this.prisma.project.updateMany({
-      where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
-      data: {
-        name: data.name,
-        businessVertical: data.businessVertical,
-        description: data.description,
-      },
-    });
+    let result;
+    try {
+      result = await this.prisma.project.updateMany({
+        where: { id: projectId, ...this.scopedWhere(organizationId, workspaceId) },
+        data: {
+          name: data.name,
+          businessVertical: data.businessVertical,
+          description: data.description,
+          whatsappNumber: data.whatsappNumber,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'Ese número de WhatsApp ya está asignado a otro proyecto',
+        );
+      }
+      throw error;
+    }
 
     if (result.count === 0) {
       throw new NotFoundException('Proyecto no encontrado');

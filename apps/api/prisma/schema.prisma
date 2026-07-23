@@ -99,6 +99,14 @@ model Project {
 
   buildStage ProjectBuildStage @default(INTAKE)
 
+  // Número de WhatsApp (formato Twilio, ej: "whatsapp:+14155238886") que
+  // atiende el agente de IA para este proyecto. En el sandbox de Twilio
+  // solo hay un número compartido para toda la cuenta, así que de momento
+  // esto solo permite un proyecto "activo" de verdad a la vez para pruebas
+  // — con un número de producción real (aprobado por Meta) cada cliente
+  // tendría el suyo propio, sin ese límite.
+  whatsappNumber String? @unique
+
   createdBy String
 
   createdAt DateTime  @default(now())

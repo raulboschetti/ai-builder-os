@@ -12,6 +12,7 @@ import {
   ApiError,
   generateRoadmap,
   getAccessToken,
+  getLatestRoadmap,
   me,
   RoadmapResult,
   SessionUser,
@@ -34,8 +35,15 @@ export default function RoadmapToolPage() {
       return;
     }
 
-    me()
-      .then((res) => setUser(res.user))
+    Promise.all([me(), getLatestRoadmap()])
+      .then(([meRes, saved]) => {
+        setUser(meRes.user);
+        if (saved) {
+          setBusinessVertical(saved.businessVertical ?? "");
+          setDescription(saved.description);
+          setResult({ phases: saved.phases });
+        }
+      })
       .catch(() => router.replace("/login"))
       .finally(() => setCheckingSession(false));
   }, [router]);

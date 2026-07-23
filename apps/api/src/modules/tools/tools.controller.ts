@@ -1,10 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AiService } from '../ai/ai.service';
 import { GenerateRoadmapDto } from './dto/generate-roadmap.dto';
+import { ToolsService } from './tools.service';
 
 /**
  * Requiere cuenta (JwtAuthGuard) — decisión explícita de Raúl: nada de
@@ -18,16 +20,26 @@ import { GenerateRoadmapDto } from './dto/generate-roadmap.dto';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('access-token')
 export class ToolsController {
-  constructor(private readonly aiService: AiService) {}
+  constructor(private readonly toolsService: ToolsService) {}
 
   @Post('roadmap')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
-  @ApiOperation({ summary: 'Generar un roadmap de 90 días' })
+  @ApiOperation({ summary: 'Generar (y guardar) un roadmap de lanzamiento' })
   @ApiBody({ type: GenerateRoadmapDto })
-  generateRoadmap(@Body() body: GenerateRoadmapDto) {
-    return this.aiService.generateRoadmap(
+  generateRoadmap(
+    @Body() body: GenerateRoadmapDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.toolsService.generateRoadmap(
+      user.id,
       body.businessVertical ?? null,
       body.description,
     );
+  }
+
+  @Get('roadmap')
+  @ApiOperation({ summary: 'Obtener el último roadmap generado por este usuario' })
+  getLatestRoadmap(@CurrentUser() user: AuthenticatedUser) {
+    return this.toolsService.getLatestRoadmap(user.id);
   }
 }

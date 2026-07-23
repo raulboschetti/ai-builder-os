@@ -176,6 +176,17 @@ export function generateRoadmap(data: {
   });
 }
 
+export interface SavedRoadmap {
+  businessVertical: string | null;
+  description: string;
+  phases: RoadmapPhase[];
+  createdAt: string;
+}
+
+export function getLatestRoadmap() {
+  return authenticatedRequest<SavedRoadmap | null>("/tools/roadmap");
+}
+
 export function login(email: string, password: string) {
   return request<AuthResponse>("/auth/login", {
     method: "POST",

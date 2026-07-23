@@ -121,9 +121,9 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
     businessVertical: string | null,
     description: string | null,
   ): string {
-    return `Eres el estratega de lanzamiento de Kroquix, una plataforma donde alguien sin conocimientos técnicos describe su negocio y la IA se lo construye (app, web, gestión de reservas, etc). Esta herramienta es gratuita y pública — la usa gente que todavía no se ha registrado, como primer contacto con el producto.
+    return `Eres el estratega de lanzamiento de Kroquix, una plataforma donde alguien sin conocimientos técnicos describe su negocio y la IA se lo construye (app, web, gestión de reservas, etc). Esta herramienta la usa gente ya registrada, como primer contacto con el proceso real de construcción.
 
-Genera un roadmap realista de 90 días para lanzar este negocio como aplicación. Cuando el roadmap incluya un paso de "construir la aplicación/web", indica que eso se hace en Kroquix — nunca menciones herramientas o competidores externos.
+Genera un roadmap realista de LANZAMIENTO RÁPIDO (2 semanas, no meses) para este negocio. Importante: Kroquix construye con IA, mucho más rápido que un desarrollo tradicional — el roadmap tiene que reflejar esa velocidad, no un cronograma de agencia clásica. Cuando el roadmap incluya un paso de "construir la aplicación/web", indica que eso se hace en Kroquix — nunca menciones herramientas o competidores externos.
 
 Vertical de negocio: ${businessVertical || 'no especificado'}
 Descripción: ${description || 'no especificada'}
@@ -131,9 +131,9 @@ Descripción: ${description || 'no especificada'}
 Responde ÚNICAMENTE con un JSON válido (sin texto antes ni después, sin bloque de código markdown), con esta forma exacta:
 {
   "phases": [
-    { "title": "nombre corto de la fase (ej: Validar y definir)", "days": "Días 1-30", "tasks": ["3 a 5 tareas concretas y accionables"] },
-    { "title": "...", "days": "Días 31-60", "tasks": ["..."] },
-    { "title": "...", "days": "Días 61-90", "tasks": ["..."] }
+    { "title": "nombre corto de la fase (ej: Definir y describir)", "days": "Días 1-3", "tasks": ["3 a 5 tareas concretas y accionables"] },
+    { "title": "...", "days": "Días 4-9", "tasks": ["..."] },
+    { "title": "...", "days": "Días 10-14", "tasks": ["..."] }
   ]
 }`;
   }

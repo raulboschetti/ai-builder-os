@@ -25,6 +25,7 @@ model User {
   projects    Project[]
   invitationsSent Invitation[]
   notifications   Notification[]
+  roadmaps        Roadmap[]
 
   @@index([email])
 }
@@ -222,6 +223,19 @@ model Notification {
   message   String
   read      Boolean          @default(false)
   createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Roadmap {
+  id               String   @id @default(cuid())
+  userId           String
+  businessVertical String?
+  description      String   @db.Text
+  phases           Json
+  createdAt        DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

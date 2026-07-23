@@ -170,7 +170,7 @@ export function generateRoadmap(data: {
   businessVertical?: string;
   description: string;
 }) {
-  return request<RoadmapResult>("/tools/roadmap", {
+  return authenticatedRequest<RoadmapResult>("/tools/roadmap", {
     method: "POST",
     body: JSON.stringify(data),
   });

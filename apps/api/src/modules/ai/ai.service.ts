@@ -84,6 +84,27 @@ export class AiService {
     };
   }
 
+  /**
+   * Respuesta de un agente conversacional (ej: WhatsApp) dado un
+   * historial de mensajes. Usa la API multi-turno de Anthropic de
+   * verdad (no reconstruye el historial dentro de un único string),
+   * así el modelo entiende la conversación como tal.
+   */
+  async generateAgentReply(
+    systemPrompt: string,
+    history: { role: 'user' | 'assistant'; content: string }[],
+  ): Promise<string> {
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 500,
+      system: systemPrompt,
+      messages: history,
+    });
+
+    const block = response.content.find((c) => c.type === 'text');
+    return block && block.type === 'text' ? block.text : '';
+  }
+
   private async complete(prompt: string, maxTokens: number): Promise<string> {
     const response = await this.client.messages.create({
       model: MODEL,

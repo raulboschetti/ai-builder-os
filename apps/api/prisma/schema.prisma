@@ -241,3 +241,18 @@ model Roadmap {
 
   @@index([userId])
 }
+
+enum WhatsAppMessageRole {
+  USER
+  ASSISTANT
+}
+
+model WhatsAppMessage {
+  id          String              @id @default(cuid())
+  phoneNumber String // el número del cliente final (From de Twilio)
+  role        WhatsAppMessageRole
+  content     String              @db.Text
+  createdAt   DateTime            @default(now())
+
+  @@index([phoneNumber, createdAt])
+}

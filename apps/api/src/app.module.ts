@@ -15,6 +15,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { ProjectsModule } from './modules/projects/projects.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { UsersModule } from './modules/users/users.module';
+import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     NotificationsModule,
     ClientModule,
     ToolsModule,
+    WhatsAppModule,
   ],
   controllers: [AppController],
   providers: [

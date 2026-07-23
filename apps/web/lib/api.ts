@@ -281,6 +281,90 @@ export function revokeClientAccess(
   );
 }
 
+export interface Service {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  active: boolean;
+}
+
+export interface BusinessHour {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
+export interface Appointment {
+  id: string;
+  customerName: string | null;
+  customerPhone: string;
+  startAt: string;
+  durationMinutes: number;
+  service: { name: string } | null;
+}
+
+export function listServices(workspaceId: string, projectId: string) {
+  return authenticatedRequest<Service[]>(
+    `/workspaces/${workspaceId}/projects/${projectId}/services`,
+  );
+}
+
+export function createService(
+  workspaceId: string,
+  projectId: string,
+  data: { name: string; durationMinutes: number },
+) {
+  return authenticatedRequest<Service>(
+    `/workspaces/${workspaceId}/projects/${projectId}/services`,
+    { method: "POST", body: JSON.stringify(data) },
+  );
+}
+
+export function deleteService(
+  workspaceId: string,
+  projectId: string,
+  serviceId: string,
+) {
+  return authenticatedRequest<void>(
+    `/workspaces/${workspaceId}/projects/${projectId}/services/${serviceId}`,
+    { method: "DELETE" },
+  );
+}
+
+export function getBusinessHours(workspaceId: string, projectId: string) {
+  return authenticatedRequest<BusinessHour[]>(
+    `/workspaces/${workspaceId}/projects/${projectId}/business-hours`,
+  );
+}
+
+export function setBusinessHours(
+  workspaceId: string,
+  projectId: string,
+  days: BusinessHour[],
+) {
+  return authenticatedRequest<BusinessHour[]>(
+    `/workspaces/${workspaceId}/projects/${projectId}/business-hours`,
+    { method: "PUT", body: JSON.stringify({ days }) },
+  );
+}
+
+export function listAppointments(workspaceId: string, projectId: string) {
+  return authenticatedRequest<Appointment[]>(
+    `/workspaces/${workspaceId}/projects/${projectId}/appointments`,
+  );
+}
+
+export function cancelAppointment(
+  workspaceId: string,
+  projectId: string,
+  appointmentId: string,
+) {
+  return authenticatedRequest<void>(
+    `/workspaces/${workspaceId}/projects/${projectId}/appointments/${appointmentId}`,
+    { method: "DELETE" },
+  );
+}
+
 export function getProject(workspaceId: string, projectId: string) {
   return authenticatedRequest<Project>(
     `/workspaces/${workspaceId}/projects/${projectId}`,

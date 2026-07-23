@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 
 import { AnalysisPanel } from "../../../components/AnalysisPanel";
+import { BookingsPanel } from "../../../components/BookingsPanel";
 import { BuildStageTimeline } from "../../../components/BuildStageTimeline";
 import { EditProjectForm } from "../../../components/EditProjectForm";
 import { InviteClient } from "../../../components/InviteClient";
@@ -176,6 +177,10 @@ export default function ProjectDetailPage() {
                 projectId={project.id}
                 initialAnalysis={analysis}
               />
+            )}
+
+            {workspaceId && (
+              <BookingsPanel workspaceId={workspaceId} projectId={project.id} />
             )}
 
             {workspaceId && (

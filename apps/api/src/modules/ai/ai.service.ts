@@ -92,7 +92,7 @@ export class AiService {
    */
   async generateAgentReply(
     systemPrompt: string,
-    history: { role: 'user' | 'assistant'; content: string }[],
+    history: Anthropic.MessageParam[],
   ): Promise<string> {
     const response = await this.client.messages.create({
       model: MODEL,
@@ -103,6 +103,57 @@ export class AiService {
 
     const block = response.content.find((c) => c.type === 'text');
     return block && block.type === 'text' ? block.text : '';
+  }
+
+  /**
+   * Igual que generateAgentReply, pero con "tool use": la IA puede
+   * llamar a funciones reales (consultar huecos libres, crear una cita)
+   * en vez de limitarse a hablar. Nunca se fía de lo que la IA "cree"
+   * — cada tool ejecuta contra la base de datos de verdad y el
+   * resultado real es lo que se le devuelve al modelo.
+   */
+  async generateAgentReplyWithTools(
+    systemPrompt: string,
+    history: Anthropic.MessageParam[],
+    tools: Anthropic.Tool[],
+    executeTool: (name: string, input: unknown) => Promise<string>,
+  ): Promise<string> {
+    const messages: Anthropic.MessageParam[] = [...history];
+
+    // Límite de vueltas por seguridad — si la IA se queda en un bucle
+    // llamando herramientas sin llegar nunca a una respuesta de texto,
+    // no queremos gastar tokens sin fin ni dejar al cliente sin respuesta.
+    for (let round = 0; round < 5; round++) {
+      const response = await this.client.messages.create({
+        model: MODEL,
+        max_tokens: 500,
+        system: systemPrompt,
+        messages,
+        tools,
+      });
+
+      if (response.stop_reason !== 'tool_use') {
+        const block = response.content.find((c) => c.type === 'text');
+        return block && block.type === 'text' ? block.text : '';
+      }
+
+      messages.push({ role: 'assistant', content: response.content });
+
+      const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      for (const block of response.content) {
+        if (block.type === 'tool_use') {
+          const result = await executeTool(block.name, block.input);
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: block.id,
+            content: result,
+          });
+        }
+      }
+      messages.push({ role: 'user', content: toolResults });
+    }
+
+    return 'Perdona, no he podido completarlo — ¿puedes intentarlo de nuevo en un momento?';
   }
 
   private async complete(prompt: string, maxTokens: number): Promise<string> {

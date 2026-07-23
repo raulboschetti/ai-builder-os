@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { PrismaModule } from './database/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BookingsModule } from './modules/bookings/bookings.module';
 import { ClientModule } from './modules/client/client.module';
 import { HealthModule } from './modules/health/health.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
@@ -43,6 +44,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     ClientModule,
     ToolsModule,
     WhatsAppModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [

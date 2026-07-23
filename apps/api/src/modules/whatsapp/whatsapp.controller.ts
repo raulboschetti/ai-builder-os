@@ -1,6 +1,7 @@
 import { Body, Controller, ForbiddenException, Headers, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import twilio from 'twilio';
 
@@ -11,7 +12,8 @@ import { WhatsAppService } from './whatsapp.service';
  * Kroquix — por eso no lleva JwtAuthGuard. En su lugar, valida la firma
  * que Twilio añade a cada petición (twilio.validateRequest), así nadie
  * puede hacerse pasar por Twilio mandando peticiones falsas a esta URL
- * pública.
+ * pública. El límite de peticiones es una segunda capa de defensa, por
+ * si esa validación fallara de alguna forma inesperada.
  */
 @Controller('whatsapp')
 export class WhatsAppController {
@@ -21,6 +23,7 @@ export class WhatsAppController {
   ) {}
 
   @Post('webhook')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiExcludeEndpoint()
   async webhook(
     @Req() req: Request,

@@ -80,12 +80,12 @@ export class BookingsService {
   ) {
     await this.assertProjectInScope(organizationId, workspaceId, projectId);
 
-    await this.prisma.$transaction([
-      this.prisma.businessHours.deleteMany({ where: { projectId } }),
-      this.prisma.businessHours.createMany({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.businessHours.deleteMany({ where: { projectId } });
+      await tx.businessHours.createMany({
         data: days.map((d) => ({ projectId, ...d })),
-      }),
-    ]);
+      });
+    });
 
     return this.prisma.businessHours.findMany({
       where: { projectId },

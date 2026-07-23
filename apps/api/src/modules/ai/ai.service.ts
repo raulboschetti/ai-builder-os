@@ -11,6 +11,16 @@ export interface BusinessAnalysisResult {
   marketCostEstimate: string;
 }
 
+export interface RoadmapPhase {
+  title: string;
+  days: string;
+  tasks: string[];
+}
+
+export interface RoadmapResult {
+  phases: RoadmapPhase[];
+}
+
 const MODEL = 'claude-sonnet-5';
 
 @Injectable()
@@ -34,21 +44,58 @@ export class AiService {
     businessVertical: string | null,
     description: string | null,
   ): Promise<BusinessAnalysisResult> {
-    const prompt = this.buildPrompt(businessVertical, description);
+    const prompt = this.buildAnalysisPrompt(businessVertical, description);
+    const text = await this.complete(prompt, 1500);
+    const parsed = this.parseJson(text);
 
+    return {
+      viability: String(parsed.viability ?? ''),
+      summary: String(parsed.summary ?? ''),
+      keyFeatures: Array.isArray(parsed.keyFeatures)
+        ? parsed.keyFeatures.map(String)
+        : [],
+      risks: Array.isArray(parsed.risks) ? parsed.risks.map(String) : [],
+      recommendation: String(parsed.recommendation ?? ''),
+      marketCostEstimate: String(parsed.marketCostEstimate ?? ''),
+    };
+  }
+
+  /**
+   * Herramienta gratuita pública (sin login) — genera un roadmap de 90
+   * días para lanzar el negocio descrito. Es un imán de captación, no
+   * algo que un usuario logueado usa dentro de un proyecto.
+   */
+  async generateRoadmap(
+    businessVertical: string | null,
+    description: string | null,
+  ): Promise<RoadmapResult> {
+    const prompt = this.buildRoadmapPrompt(businessVertical, description);
+    const text = await this.complete(prompt, 1800);
+    const parsed = this.parseJson(text);
+
+    const phases = Array.isArray(parsed.phases) ? parsed.phases : [];
+
+    return {
+      phases: phases.map((phase: Record<string, unknown>) => ({
+        title: String(phase.title ?? ''),
+        days: String(phase.days ?? ''),
+        tasks: Array.isArray(phase.tasks) ? phase.tasks.map(String) : [],
+      })),
+    };
+  }
+
+  private async complete(prompt: string, maxTokens: number): Promise<string> {
     const response = await this.client.messages.create({
       model: MODEL,
-      max_tokens: 1500,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
 
     const block = response.content.find((c) => c.type === 'text');
-    const text = block && block.type === 'text' ? block.text : '';
-
-    return this.parseResult(text);
+    return block && block.type === 'text' ? block.text : '';
   }
 
-  private buildPrompt(
+  private buildAnalysisPrompt(
     businessVertical: string | null,
     description: string | null,
   ): string {
@@ -70,7 +117,28 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
 }`;
   }
 
-  private parseResult(text: string): BusinessAnalysisResult {
+  private buildRoadmapPrompt(
+    businessVertical: string | null,
+    description: string | null,
+  ): string {
+    return `Eres el estratega de lanzamiento de Kroquix, una plataforma donde alguien sin conocimientos técnicos describe su negocio y la IA se lo construye (app, web, gestión de reservas, etc). Esta herramienta es gratuita y pública — la usa gente que todavía no se ha registrado, como primer contacto con el producto.
+
+Genera un roadmap realista de 90 días para lanzar este negocio como aplicación. Cuando el roadmap incluya un paso de "construir la aplicación/web", indica que eso se hace en Kroquix — nunca menciones herramientas o competidores externos.
+
+Vertical de negocio: ${businessVertical || 'no especificado'}
+Descripción: ${description || 'no especificada'}
+
+Responde ÚNICAMENTE con un JSON válido (sin texto antes ni después, sin bloque de código markdown), con esta forma exacta:
+{
+  "phases": [
+    { "title": "nombre corto de la fase (ej: Validar y definir)", "days": "Días 1-30", "tasks": ["3 a 5 tareas concretas y accionables"] },
+    { "title": "...", "days": "Días 31-60", "tasks": ["..."] },
+    { "title": "...", "days": "Días 61-90", "tasks": ["..."] }
+  ]
+}`;
+  }
+
+  private parseJson(text: string): Record<string, unknown> {
     const cleaned = text
       .trim()
       .replace(/^```(json)?/i, '')
@@ -78,17 +146,7 @@ Analiza esta idea y responde ÚNICAMENTE con un JSON válido (sin texto antes ni
       .trim();
 
     try {
-      const parsed = JSON.parse(cleaned);
-      return {
-        viability: String(parsed.viability ?? ''),
-        summary: String(parsed.summary ?? ''),
-        keyFeatures: Array.isArray(parsed.keyFeatures)
-          ? parsed.keyFeatures.map(String)
-          : [],
-        risks: Array.isArray(parsed.risks) ? parsed.risks.map(String) : [],
-        recommendation: String(parsed.recommendation ?? ''),
-        marketCostEstimate: String(parsed.marketCostEstimate ?? ''),
-      };
+      return JSON.parse(cleaned);
     } catch {
       this.logger.error(`No se pudo interpretar la respuesta de la IA: ${text}`);
       throw new BadGatewayException(

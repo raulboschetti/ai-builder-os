@@ -156,6 +156,26 @@ async function authenticatedRequest<T>(
   return parseResponse<T>(retryResponse);
 }
 
+export interface RoadmapPhase {
+  title: string;
+  days: string;
+  tasks: string[];
+}
+
+export interface RoadmapResult {
+  phases: RoadmapPhase[];
+}
+
+export function generateRoadmap(data: {
+  businessVertical?: string;
+  description: string;
+}) {
+  return request<RoadmapResult>("/tools/roadmap", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export function login(email: string, password: string) {
   return request<AuthResponse>("/auth/login", {
     method: "POST",

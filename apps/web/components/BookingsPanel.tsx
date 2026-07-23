@@ -37,6 +37,7 @@ export function BookingsPanel({
   const [hours, setHours] = useState<Record<number, BusinessHour>>({});
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [newServiceName, setNewServiceName] = useState("");
   const [newServiceDuration, setNewServiceDuration] = useState(30);
@@ -102,11 +103,20 @@ export function BookingsPanel({
   }
 
   async function handleSaveHours() {
-    const days = Object.values(hours);
-    const saved = await setBusinessHours(workspaceId, projectId, days);
-    const map: Record<number, BusinessHour> = {};
-    saved.forEach((h) => (map[h.dayOfWeek] = h));
-    setHours(map);
+    setError(null);
+    try {
+      const days = Object.values(hours).map((h) => ({
+        dayOfWeek: h.dayOfWeek,
+        startTime: h.startTime,
+        endTime: h.endTime,
+      }));
+      const saved = await setBusinessHours(workspaceId, projectId, days);
+      const map: Record<number, BusinessHour> = {};
+      saved.forEach((h) => (map[h.dayOfWeek] = h));
+      setHours(map);
+    } catch {
+      setError("No se ha podido guardar el horario");
+    }
   }
 
   async function handleCancelAppointment(appointmentId: string) {
@@ -242,6 +252,7 @@ export function BookingsPanel({
         >
           Guardar horario
         </button>
+        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
       </div>
 
       {/* Citas reservadas */}

@@ -17,6 +17,7 @@ import {
   listOrganizationUsers,
   me,
   MeResponse,
+  removeOrganizationMember,
   SessionUser,
 } from "../../lib/api";
 
@@ -56,6 +57,12 @@ export default function SettingsPage() {
     setMembers((prev) =>
       prev.map((m) => (m.id === updatedUser.id ? updatedUser : m)),
     );
+  }
+
+  async function handleRemoveMember(userId: string) {
+    if (!confirm("¿Quitar a esta persona del equipo?")) return;
+    await removeOrganizationMember(userId);
+    setMembers((prev) => prev.filter((m) => m.id !== userId));
   }
 
   return (
@@ -121,7 +128,7 @@ export default function SettingsPage() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-grid-500 font-mono text-xs text-paper-50">
                       {(member.name ?? member.email).charAt(0).toUpperCase()}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm text-paper-50">
                         {member.name ?? member.email}
                       </p>
@@ -129,6 +136,14 @@ export default function SettingsPage() {
                         {member.email}
                       </p>
                     </div>
+                    {session && member.id !== session.user.id && (
+                      <button
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="rounded-lg border border-red-900 px-2.5 py-1 text-xs text-red-400 transition hover:border-red-700 hover:text-red-300"
+                      >
+                        Quitar
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

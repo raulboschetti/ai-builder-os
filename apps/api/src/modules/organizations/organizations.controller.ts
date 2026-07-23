@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -57,5 +57,19 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Obtener una organización (solo si el usuario es miembro)' })
   findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.organizationsService.findByIdForUser(id, user.id);
+  }
+
+  @Delete('members/:userId')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Quitar a un miembro de mi organización (solo OWNER)' })
+  removeMember(
+    @Param('userId') userId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.organizationsService.removeMember(
+      user.organizationId,
+      user.id,
+      userId,
+    );
   }
 }

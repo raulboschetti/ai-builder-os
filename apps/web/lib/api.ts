@@ -351,6 +351,12 @@ export function listOrganizationUsers() {
   return authenticatedRequest<SessionUser[]>("/users");
 }
 
+export function removeOrganizationMember(userId: string) {
+  return authenticatedRequest<void>(`/organizations/members/${userId}`, {
+    method: "DELETE",
+  });
+}
+
 export interface ClientProject extends Project {
   organizationName: string;
 }

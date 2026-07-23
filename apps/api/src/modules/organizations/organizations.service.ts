@@ -114,4 +114,48 @@ export class OrganizationsService {
 
     return OrganizationMapper.toResponse(organization);
   }
+
+  /**
+   * Quita a un miembro de la organización (borra su membership, no su
+   * cuenta de usuario — sigue existiendo, solo pierde el acceso a esta
+   * organización). Solo el OWNER puede hacerlo, no puede quitarse a sí
+   * mismo (evita quedarse sin dueño por accidente), y solo aplica a
+   * miembros normales (MEMBER/ADMIN), no a accesos de tipo CLIENT —
+   * esos se gestionan desde el proyecto, no desde aquí.
+   */
+  async removeMember(
+    organizationId: string,
+    requesterId: string,
+    targetUserId: string,
+  ) {
+    if (requesterId === targetUserId) {
+      throw new ForbiddenException(
+        'No puedes quitarte a ti mismo del equipo desde aquí',
+      );
+    }
+
+    const requesterMembership = await this.prisma.membership.findUnique({
+      where: {
+        userId_organizationId: { userId: requesterId, organizationId },
+      },
+    });
+
+    if (!requesterMembership || requesterMembership.role !== MembershipRole.OWNER) {
+      throw new ForbiddenException(
+        'Solo el propietario de la organización puede quitar miembros',
+      );
+    }
+
+    const result = await this.prisma.membership.deleteMany({
+      where: {
+        userId: targetUserId,
+        organizationId,
+        role: { in: [MembershipRole.MEMBER, MembershipRole.ADMIN] },
+      },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('Miembro no encontrado');
+    }
+  }
 }

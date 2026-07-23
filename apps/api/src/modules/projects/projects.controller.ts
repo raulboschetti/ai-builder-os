@@ -81,6 +81,7 @@ export class ProjectsController {
       name: body.name,
       businessVertical: body.businessVertical,
       description: body.description,
+      whatsappNumber: body.whatsappNumber,
     });
   }
 

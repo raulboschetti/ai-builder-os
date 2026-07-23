@@ -9,6 +9,7 @@ import {
   Home,
   LayoutGrid,
   LineChart,
+  Map,
   Menu,
   Rocket,
   Settings,
@@ -21,6 +22,7 @@ import { SpainSkyline } from "./SpainSkyline";
 const LIVE_ITEMS = [
   { label: "Inicio", icon: Home, href: "/" },
   { label: "Proyectos", icon: LayoutGrid, href: "/" },
+  { label: "Roadmap 90 días", icon: Map, href: "/herramientas/roadmap" },
   { label: "Configuración", icon: Settings, href: "/settings" },
 ];
 
